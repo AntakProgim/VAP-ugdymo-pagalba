@@ -1,0 +1,8 @@
+{
+  "name": "VAP UGDYMO PAGALBA",
+  "description": "Struktūruota pagalbos ir komunikacijos sistema Vilniaus Antakalnio progimnazijai, skirta mokinių elgesio valdymui, specialistų kontaktams ir laiškų šablonams.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
