@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Sidebar from './components/Sidebar';
 import Dashboard from './components/Dashboard';
@@ -8,7 +7,6 @@ import ScenariosTab from './components/ScenariosTab';
 import IntroTab from './components/IntroTab';
 import EmergencyTab from './components/EmergencyTab';
 import AIAssistant from './components/AIAssistant';
-import TemplatesTab from './components/TemplatesTab';
 import { Menu, X } from 'lucide-react';
 
 const App: React.FC = () => {
@@ -40,7 +38,6 @@ const App: React.FC = () => {
       case 'schemes': return <SchemesTab />;
       case 'contacts': return <ContactsTab />;
       case 'scenarios': return <ScenariosTab setActiveTab={handleTabChange} initialScenarioId={selectedScenarioId} />;
-      case 'templates': return <TemplatesTab />;
       case 'ai-assistant': return <AIAssistant contextTab={lastContextTab} />;
       default: return <Dashboard setActiveTab={handleTabChange} onSelectScenario={handleSelectScenario} />;
     }
@@ -54,7 +51,6 @@ const App: React.FC = () => {
       case 'schemes': return 'Procesai';
       case 'contacts': return 'Specialistai';
       case 'scenarios': return 'Situacijos';
-      case 'templates': return 'Laiškų šablonai';
       case 'ai-assistant': return 'DI emocinė pagalvėlė ✨';
       default: return 'VAP Pagalba';
     }
@@ -80,7 +76,6 @@ const App: React.FC = () => {
             { id: 'scenarios', label: 'Situacijos' },
             { id: 'schemes', label: 'Schemos' },
             { id: 'contacts', label: 'Specialistai' },
-            { id: 'templates', label: 'Laiškų šablonai' },
           ].map((item) => (
             <button
               key={item.id}
@@ -94,6 +89,13 @@ const App: React.FC = () => {
               <span className="text-xs">{item.label}</span>
             </button>
           ))}
+          {/* External Link in Mobile Menu */}
+          <button
+            onClick={() => window.open('https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?usp=sharing', '_blank')}
+            className="w-full text-left px-3 py-2 rounded-lg transition-colors flex items-center justify-between text-slate-600 hover:bg-slate-50"
+          >
+            <span className="text-xs">Laiškų šablonai</span>
+          </button>
         </nav>
       </div>
 

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { ArrowRight, CheckCircle2, ShieldAlert, Users, MessageSquare, Target, HeartHandshake, Trees } from 'lucide-react';
 
@@ -29,8 +28,8 @@ const SchemesTab: React.FC = () => {
               Procesų Valdymas
             </span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-[900] text-white mb-4 tracking-tighter leading-tight uppercase">
-            PAGALBOS <br/> SCHEMOS
+          <h1 className="text-3xl md:text-5xl font-[900] text-white mb-4 tracking-tighter leading-tight uppercase whitespace-nowrap">
+            PAGALBOS SCHEMOS
           </h1>
           <p className="text-green-100 text-sm md:text-base font-medium leading-relaxed opacity-90">
             Algoritmai ir veiksmų seka, užtikrinanti nuoseklų bei efektyvų problemų sprendimą.
@@ -56,7 +55,7 @@ const SchemesTab: React.FC = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="bg-white p-8 rounded-3xl shadow-sm border-l-8 border-amber-500 hover:translate-x-1 transition-transform">
-              <h4 className="font-black text-amber-900 uppercase text-xs tracking-widest mb-4">I etapas. mokytojo veiksamy</h4>
+              <h4 className="font-black text-amber-900 uppercase text-xs tracking-widest mb-4">I etapas. mokytojo veiksmai</h4>
               <ul className="text-[14px] text-gray-700 space-y-4 font-bold">
                 <li className="flex items-start"><span className="text-amber-500 mr-3">1.</span> Pastaba. Pozityvus susitarimas.</li>
                 <li className="flex items-start"><span className="text-amber-500 mr-3">2.</span> Perspėjimas. Informavimas apie UAK grėsmę.</li>

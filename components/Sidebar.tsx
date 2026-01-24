@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   Mail, 
@@ -83,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
             <ExternalLink size={12} className="opacity-30 group-hover:opacity-100" />
           </button>
           <button
-            onClick={() => handleExternalLink('https://docs.google.com/document/d/108fN0vGKqQ8gP5I6hy4QgemoPIenAYZoq7fugSKMmrE/edit?usp=sharing')}
+            onClick={() => handleExternalLink('https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?usp=sharing')}
             className="w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-slate-500 hover:text-green-700 hover:bg-green-50 transition-all group"
           >
             <Mail size={18} className="text-slate-400 group-hover:text-green-600" />

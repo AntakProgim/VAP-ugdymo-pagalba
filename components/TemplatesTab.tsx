@@ -6,12 +6,13 @@ import {
   Send, 
   Copy, 
   Check, 
-  ChevronRight, 
   FileText, 
   ExternalLink,
   Info,
   Edit3,
-  Trees
+  Trees,
+  LayoutGrid,
+  ChevronRight
 } from 'lucide-react';
 import { INITIAL_TEMPLATES } from '../constants';
 import { EmailTemplate, TemplateCategory } from '../types';
@@ -24,21 +25,16 @@ const TemplatesTab: React.FC = () => {
   const [editableSubject, setEditableSubject] = useState('');
   const [copied, setCopied] = useState(false);
 
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(INITIAL_TEMPLATES.map(t => t.category)));
-    return ['Visi', ...cats];
-  }, []);
-
-  const filteredTemplates = useMemo(() => {
+  const categories = useMemo(() => ['Visi', ...Array.from(new Set(INITIAL_TEMPLATES.map(t => t.category)))], []);
+  const filtered = useMemo(() => {
     return INITIAL_TEMPLATES.filter(t => {
-      const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                           t.subject.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCat = selectedCategory === 'Visi' || t.category === selectedCategory;
-      return matchesSearch && matchesCat;
+      const matchSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) || t.subject.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchCat = selectedCategory === 'Visi' || t.category === selectedCategory;
+      return matchSearch && matchCat;
     });
   }, [searchTerm, selectedCategory]);
 
-  const handleSelectTemplate = (t: EmailTemplate) => {
+  const handleSelect = (t: EmailTemplate) => {
     setSelectedTemplate(t);
     setEditableBody(t.body);
     setEditableSubject(t.subject);
@@ -50,190 +46,123 @@ const TemplatesTab: React.FC = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleSend = () => {
-    if (!selectedTemplate) return;
-    const to = selectedTemplate.to || '';
-    const cc = selectedTemplate.cc || '';
-    const subject = encodeURIComponent(editableSubject);
-    const body = encodeURIComponent(editableBody);
-    window.location.href = `mailto:${to}?cc=${cc}&subject=${subject}&body=${body}`;
-  };
-
-  const editUrl = "https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit";
-
   return (
-    <div className="space-y-6 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Vientisa Hero antraštė */}
-      <div className="relative bg-green-700 rounded-[2rem] overflow-hidden border border-green-800 shadow-xl shadow-green-900/10">
-        <div className="absolute top-0 right-0 p-4 opacity-[0.07] text-white pointer-events-none translate-x-12 -translate-y-12 rotate-12">
-          <div className="bg-white/20 p-20 rounded-[5rem]">
-            <Trees size={340} />
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 h-[calc(100vh-140px)] animate-in fade-in duration-700">
+      {/* List Sidebar */}
+      <div className="lg:col-span-4 flex flex-col space-y-6 min-h-0">
+        <div className="bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col space-y-6">
+          <div className="relative group">
+            <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-green-700 transition-colors" size={18} />
+            <input 
+              type="text" 
+              placeholder="Ieškoti šablono..."
+              className="w-full pl-12 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-green-700 transition-all text-sm font-bold"
+              value={searchTerm}
+              onChange={e => setSearchTerm(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {categories.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat as any)}
+                className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border ${
+                  selectedCategory === cat ? 'bg-slate-900 border-slate-900 text-white shadow-lg' : 'bg-white border-slate-100 text-slate-500 hover:border-slate-300'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
         </div>
-        
-        <div className="relative z-10 p-8 md:p-12 flex flex-col items-start max-w-2xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-green-600/50 backdrop-blur-md border border-white/10 rounded-full mb-6">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-green-100">
-              Bendruomenės Komunikacija
-            </span>
+
+        <div className="flex-1 overflow-y-auto bg-white rounded-[2.5rem] border border-slate-100 shadow-sm p-4 scrollbar-thin">
+          <div className="space-y-2">
+            {filtered.map(t => (
+              <button
+                key={t.id}
+                onClick={() => handleSelect(t)}
+                className={`w-full text-left p-5 rounded-[1.8rem] transition-all flex items-center space-x-4 border ${
+                  selectedTemplate?.id === t.id ? 'bg-green-700 border-green-700 text-white shadow-xl translate-x-1' : 'bg-white border-transparent hover:bg-slate-50'
+                }`}
+              >
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 transition-colors ${
+                  selectedTemplate?.id === t.id ? 'bg-white/20' : 'bg-slate-100 text-slate-400'
+                }`}>
+                  <FileText size={20} />
+                </div>
+                <div className="flex-1 truncate">
+                  <h4 className={`text-sm font-black truncate leading-none mb-2 ${selectedTemplate?.id === t.id ? 'text-white' : 'text-slate-800'}`}>{t.title}</h4>
+                  <p className={`text-[9px] font-black uppercase tracking-widest ${selectedTemplate?.id === t.id ? 'text-green-200' : 'text-slate-400'}`}>
+                    {t.category}
+                  </p>
+                </div>
+                <ChevronRight size={16} className={`transition-opacity ${selectedTemplate?.id === t.id ? 'opacity-100' : 'opacity-0'}`} />
+              </button>
+            ))}
           </div>
-          <h1 className="text-3xl md:text-5xl font-[900] text-white mb-4 tracking-tighter leading-tight uppercase">
-            LAIŠKŲ <br/> ŠABLONAI
-          </h1>
-          <p className="text-green-100 text-sm md:text-base font-medium leading-relaxed opacity-90">
-            Profesionalūs susirašinėjimo pavyzdžiai, skirti greitam ir efektyviam bendradarbiavimui su tėvais bei institucijomis.
-          </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100vh-320px)] overflow-hidden">
-        {/* Sidebar: List of Templates */}
-        <div className="lg:col-span-4 flex flex-col space-y-4 min-h-0 h-full">
-          <div className="bg-white p-5 rounded-[2rem] border border-slate-100 shadow-sm space-y-4">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
-              <input 
-                type="text" 
-                placeholder="Ieškoti šablono..."
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:border-green-700 transition-all text-sm font-bold"
-                value={searchTerm}
-                onChange={e => setSearchTerm(e.target.value)}
-              />
-            </div>
-            
-            <div className="flex flex-wrap gap-1.5">
-              {categories.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setSelectedCategory(cat as any)}
-                  className={`px-3 py-1.5 rounded-xl text-[9px] font-black uppercase tracking-wider transition-all border ${
-                    selectedCategory === cat 
-                      ? 'bg-green-700 border-green-700 text-white shadow-md' 
-                      : 'bg-white border-slate-100 text-slate-500 hover:border-green-700/20'
-                  }`}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex-1 overflow-y-auto bg-white rounded-[2rem] border border-slate-100 shadow-sm p-3 scrollbar-thin">
-            <div className="space-y-1.5">
-              {filteredTemplates.map(t => (
-                <button
-                  key={t.id}
-                  onClick={() => handleSelectTemplate(t)}
-                  className={`w-full text-left p-4 rounded-2xl transition-all flex items-start space-x-3 group border ${
-                    selectedTemplate?.id === t.id 
-                      ? 'bg-green-50 border-green-100 shadow-sm' 
-                      : 'bg-white border-transparent hover:bg-slate-50'
-                  }`}
-                >
-                  <div className={`p-3 rounded-xl flex-shrink-0 transition-all ${
-                    selectedTemplate?.id === t.id ? 'bg-green-700 text-white' : 'bg-slate-100 text-slate-400 group-hover:bg-white'
-                  }`}>
-                    <FileText size={18} />
+      {/* Editor Main */}
+      <div className="lg:col-span-8 flex flex-col min-h-0">
+        {selectedTemplate ? (
+          <div className="bg-white border border-slate-100 rounded-[3rem] shadow-2xl h-full flex flex-col overflow-hidden animate-in zoom-in-95 duration-500">
+            <div className="p-10 bg-slate-900 text-white relative">
+              <div className="absolute top-0 right-0 p-8 opacity-5 text-white pointer-events-none">
+                <Trees size={160} />
+              </div>
+              <div className="relative z-10">
+                <div className="flex items-center space-x-3 mb-6">
+                  <span className="px-3 py-1 bg-white/10 rounded-lg text-[9px] font-black uppercase tracking-widest border border-white/10">{selectedTemplate.category}</span>
+                  <span className="px-3 py-1 bg-green-500 rounded-lg text-[9px] font-black uppercase tracking-widest">{selectedTemplate.level || 'A'} LYGIS</span>
+                </div>
+                <h3 className="text-3xl font-black tracking-tight uppercase mb-8">{selectedTemplate.title}</h3>
+                
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1 bg-white/5 rounded-2xl p-4 border border-white/10">
+                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest block mb-1">TEMA</span>
+                    <input className="w-full bg-transparent border-none outline-none text-sm font-bold text-white" value={editableSubject} onChange={e => setEditableSubject(e.target.value)} />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`text-[13px] font-black truncate leading-tight mb-1 ${selectedTemplate?.id === t.id ? 'text-green-900' : 'text-slate-800'}`}>
-                      {t.title}
-                    </h4>
-                    <p className={`text-[9px] font-black uppercase tracking-widest ${selectedTemplate?.id === t.id ? 'text-green-600/70' : 'text-slate-400'}`}>
-                      {t.recipientType}
-                    </p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <a 
-            href={editUrl} 
-            target="_blank" 
-            className="flex items-center justify-center space-x-2 py-4 bg-slate-900 text-white rounded-[1.5rem] text-[10px] font-black uppercase tracking-widest hover:bg-green-700 transition-all shadow-lg hover:-translate-y-0.5"
-          >
-            <Edit3 size={16} />
-            <span>REDAGUOTI ŠABLONUS</span>
-            <ExternalLink size={12} className="opacity-50" />
-          </a>
-        </div>
-
-        {/* Main Area: Editor */}
-        <div className="lg:col-span-8 flex flex-col min-h-0 h-full">
-          {selectedTemplate ? (
-            <div className="bg-white border border-slate-100 rounded-[2.5rem] shadow-sm flex-1 flex flex-col overflow-hidden relative">
-              <div className="p-8 border-b border-green-800 bg-green-700 text-white">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
-                  <div>
-                    <div className="flex items-center space-x-2 mb-2">
-                      <span className="bg-white/10 backdrop-blur-sm text-green-100 text-[8px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest border border-white/10">
-                        {selectedTemplate.category}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-black text-white tracking-tight uppercase">{selectedTemplate.title}</h3>
-                  </div>
-                  
                   <div className="flex items-center space-x-2">
-                    <button 
-                      onClick={handleCopy}
-                      className="flex items-center space-x-3 px-5 py-3 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-xl text-[10px] font-black uppercase tracking-widest transition-all group"
-                    >
-                      {copied ? <Check size={16} className="text-green-300" /> : <Copy size={16} className="group-hover:rotate-6 transition-transform" />}
+                    <button onClick={handleCopy} className="flex items-center space-x-3 px-8 py-4 bg-white/10 hover:bg-white/20 border border-white/20 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all">
+                      {copied ? <Check size={18} className="text-green-400" /> : <Copy size={18} />}
                       <span>{copied ? 'NUKOPIJUOTA' : 'KOPIJUOTI'}</span>
                     </button>
-                    <button 
-                      onClick={handleSend}
-                      className="flex items-center space-x-3 px-7 py-3 bg-white text-green-700 rounded-xl text-[10px] font-black uppercase tracking-widest hover:bg-green-50 transition-all shadow-xl hover:-translate-y-0.5"
-                    >
-                      <Send size={16} />
+                    <button onClick={() => window.location.href = `mailto:${selectedTemplate.to || ''}?cc=${selectedTemplate.cc || ''}&subject=${encodeURIComponent(editableSubject)}&body=${encodeURIComponent(editableBody)}`} className="flex items-center space-x-3 px-8 py-4 bg-green-600 hover:bg-green-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all shadow-xl">
+                      <Send size={18} />
                       <span>SIŲSTI</span>
                     </button>
                   </div>
                 </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="flex items-center bg-green-800/50 p-3 rounded-xl border border-white/10">
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest w-14">Tema:</span>
-                    <input 
-                      className="flex-1 bg-transparent border-none outline-none text-xs font-bold text-white placeholder-white/30"
-                      value={editableSubject}
-                      onChange={e => setEditableSubject(e.target.value)}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex-1 p-8 relative bg-white">
-                <textarea 
-                  className="w-full h-full bg-transparent border-none outline-none resize-none text-slate-800 leading-relaxed font-bold text-base placeholder-slate-200 scrollbar-thin"
-                  value={editableBody}
-                  onChange={e => setEditableBody(e.target.value)}
-                />
-              </div>
-
-              <div className="p-6 bg-blue-50 border-t border-blue-100 flex items-start space-x-4">
-                <div className="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg flex-shrink-0">
-                  <Info size={20} />
-                </div>
-                <div className="text-[12px] text-blue-900 leading-relaxed font-bold">
-                  <strong className="block mb-0.5 font-black uppercase tracking-widest text-[9px] text-blue-800">REKOMENDACIJA</strong>
-                  Nepamirškite pakeisti teksto skliausteliuose <code className="bg-blue-100 px-1 rounded font-black text-blue-700">[pvz., vardą]</code>.
-                </div>
               </div>
             </div>
-          ) : (
-            <div className="bg-white border-2 border-dashed border-slate-100 rounded-[2.5rem] flex-1 flex flex-col items-center justify-center p-12 text-center group">
-              <div className="bg-green-50 p-10 rounded-full mb-6 text-green-200 group-hover:bg-green-700 group-hover:text-white transition-all duration-700 transform group-hover:rotate-12">
-                <Mail size={80} />
-              </div>
-              <h3 className="text-2xl font-black text-slate-900 mb-2 tracking-tight uppercase">Pasirinkite šabloną</h3>
-              <p className="text-slate-400 font-bold max-w-sm text-sm">
-                Pasirinkite laišką iš kairiojo sąrašo, kad galėtumėte jį redaguoti ir išsiųsti.
-              </p>
+
+            <div className="flex-1 p-10 bg-slate-50/30">
+              <textarea className="w-full h-full bg-transparent border-none outline-none resize-none text-slate-800 leading-relaxed font-bold text-lg placeholder-slate-200 scrollbar-thin" value={editableBody} onChange={e => setEditableBody(e.target.value)} />
             </div>
-          )}
-        </div>
+
+            <div className="p-8 bg-blue-50/50 border-t border-blue-100 flex items-start space-x-4">
+              <div className="bg-blue-600 p-3 rounded-2xl text-white shadow-lg">
+                <Info size={24} />
+              </div>
+              <div className="text-sm font-bold text-blue-900 leading-relaxed">
+                <strong className="block mb-1 font-black uppercase tracking-widest text-[10px]">Patarimas</strong>
+                Prisiminkite užpildyti duomenis skliausteliuose <code className="bg-blue-100 px-2 py-0.5 rounded text-blue-800">[...]</code>. Šis šablonas yra paruoštas pagal mokyklos susitarimus.
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-white border-2 border-dashed border-slate-200 rounded-[3rem] h-full flex flex-col items-center justify-center p-20 text-center space-y-8">
+            <div className="bg-slate-50 p-16 rounded-full text-slate-100">
+              <Mail size={120} />
+            </div>
+            <div className="max-w-sm">
+              <h3 className="text-3xl font-black text-slate-900 uppercase tracking-tight mb-4">Pasirinkite šabloną</h3>
+              <p className="text-slate-400 font-bold uppercase tracking-widest text-[10px]">Spustelėkite bet kurį šabloną iš kairiojo sąrašo, kad galėtumėte jį redaguoti ir naudoti.</p>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

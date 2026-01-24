@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   MessageCircle, 
@@ -21,11 +20,13 @@ interface DashboardProps {
 const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario }) => {
   const stats = [
     { 
-      id: 'templates', 
+      id: 'templates-link', 
       label: 'Laiškų šablonai', 
       value: '29', 
       icon: <MessageCircle size={20} />, 
       bg: 'bg-green-50 text-green-700',
+      external: true,
+      url: 'https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?usp=sharing'
     },
     { id: 'contacts', label: 'Specialistai', value: '20', icon: <Users size={20} />, bg: 'bg-blue-50 text-blue-700' },
     { id: 'contacts', label: 'Mokyklos vadovai', value: '5', icon: <Zap size={20} />, bg: 'bg-amber-50 text-amber-600' },
@@ -44,6 +45,14 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
     { id: 'ginčas', title: 'Fizinis ginčas', desc: 'Nedelsiant atskirti dalyvius, kviesti vadovą.', color: 'indigo' },
     { id: 'draudziami', title: 'Draudžiami daiktai', desc: 'Patikra vykdoma tik komisijos būdu.', color: 'slate' },
   ];
+
+  const handleStatClick = (stat: any) => {
+    if (stat.external) {
+      window.open(stat.url, '_blank');
+    } else {
+      setActiveTab(stat.id);
+    }
+  };
 
   return (
     <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -90,7 +99,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
         {stats.map((stat, idx) => (
           <button 
             key={idx} 
-            onClick={() => setActiveTab(stat.id)}
+            onClick={() => handleStatClick(stat)}
             className="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center space-x-5 hover:border-green-200 hover:-translate-y-1 transition-all text-left group"
           >
             <div className={`p-4 ${stat.bg} rounded-xl group-hover:scale-110 transition-transform duration-300`}>

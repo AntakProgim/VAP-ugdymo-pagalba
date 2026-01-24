@@ -6,7 +6,7 @@ import {
   Users, BookOpen, UserCheck, CloudRain, Snowflake, Info,
   PauseCircle, Ban, Skull, Siren, Diamond, AlertCircle,
   ChevronDown, Smile, ClipboardList, User, FileText, Activity,
-  MessageSquareText, ExternalLink
+  MessageSquareText, ExternalLink, BookOpenCheck
 } from 'lucide-react';
 
 interface ScenarioItem {
@@ -16,6 +16,7 @@ interface ScenarioItem {
   parent?: string;
   scheme: string[];
   additional: string;
+  resourceLink?: string;
 }
 
 interface ScenariosTabProps {
@@ -170,7 +171,7 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
         'Nesiliaujant. Kreipiamasi į specialistus, vėliau į VGK veiksmų plano sudarymui.',
         'Pagalba esant grėsmei. Skambinti 112 arba Vaiko linijai 116 111.'
       ],
-      additional: 'KONFIDENCIALUMAS. Visa informacija yra konfidenciali. Svarbu saugi "Patyčių dėžutė".'
+      additional: 'KONFIDENCIALUMAS. Visa informacija yra konfidenciali. Svarbu safe "Patyčių dėžutė".'
     },
     {
       id: 'ginčas',
@@ -209,7 +210,8 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
         'Hipoaktyvacija. „Sustingimas“. Reikia pasiūlyti nedidelę fizinę veiklą suaktyvinimui.',
         'Tikslas. Išmokyti vaiką valdyti emocijas, o ne slopinti jas per kontrolę.'
       ],
-      additional: 'ELGESYS KAIP KOMUNIKACIJA. Visada klausti – ką vaikas bando pasiekti šiuo elgesiu?'
+      additional: 'ELGESYS KAIP KOMUNIKACIJA. Visada klausti – ką vaikas bando pasiekti šiuo elgesiu?',
+      resourceLink: 'https://lisc.lt/edukacines-patirties-bankas/elgesio-ir-ar-emociju-sutrikimai/'
     },
     {
       id: 'mokymas',
@@ -297,7 +299,7 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
       </div>
       
       <div className="md:col-span-8 flex flex-col min-h-0">
-        <div className="bg-white border border-gray-200 rounded-xl flex-1 flex flex-col p-8 shadow-sm overflow-y-auto">
+        <div className="bg-white border border-gray-200 rounded-xl flex-1 flex flex-col p-8 shadow-sm overflow-y-auto scrollbar-thin">
           <div className="flex items-start space-x-4 mb-10">
             <div className="p-4 bg-gray-50 rounded-2xl flex-shrink-0 shadow-inner">
               {current.icon}
@@ -342,9 +344,19 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
                 <Info size={14} className="mr-2" />
                 SVARBU ŽINOTI
               </h4>
-              <p className="text-[15px] text-amber-950 leading-relaxed font-bold relative z-10 whitespace-pre-wrap">
+              <p className="text-[15px] text-amber-950 leading-relaxed font-bold relative z-10 whitespace-pre-wrap mb-4">
                 {current.additional}
               </p>
+              {current.resourceLink && (
+                <a 
+                  href={current.resourceLink} 
+                  target="_blank" 
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-white text-amber-700 border border-amber-200 rounded-xl font-black text-[10px] uppercase tracking-widest hover:bg-amber-600 hover:text-white transition-all shadow-sm relative z-10"
+                >
+                  <BookOpenCheck size={14} />
+                  <span>Išsamūs LISC resursai</span>
+                </a>
+              )}
             </section>
           </div>
 
