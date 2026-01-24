@@ -6,15 +6,13 @@ import {
   Phone, 
   Mail, 
   MapPin, 
-  MessageSquareText, 
   Shield,
   Heart,
   Users,
   Brain,
   MessageCircle,
   GraduationCap,
-  Trees,
-  ExternalLink
+  Trees
 } from 'lucide-react';
 
 const CATEGORY_STYLES: Record<SpecialistCategory, { bg: string, badge: string, icon: React.ReactNode, iconBg: string, text: string }> = {
@@ -72,7 +70,7 @@ const ContactsTab: React.FC = () => {
           <h1 className="text-3xl md:text-5xl font-[900] text-white mb-2 tracking-tighter leading-tight uppercase">
             MOKYKLOS SPECIALISTAI
           </h1>
-          <p className="text-lg md:text-xl font-bold text-green-200 uppercase tracking-tight opacity-90">
+          <p className="text-sm md:text-base font-black text-green-200/80 uppercase tracking-widest">
             Vilniaus Antakalnio progimnazija
           </p>
         </div>

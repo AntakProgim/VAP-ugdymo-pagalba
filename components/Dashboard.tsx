@@ -47,7 +47,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
 
   return (
     <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Hero Section - Balanced Typography */}
+      {/* Hero Section - Refined Typography */}
       <div className="relative bg-green-700 rounded-[2rem] overflow-hidden border border-green-800 shadow-xl shadow-green-900/10">
         <div className="absolute top-0 right-0 p-4 opacity-[0.07] text-white pointer-events-none translate-x-12 -translate-y-12 rotate-12">
           <div className="bg-white/20 p-20 rounded-[5rem]">
@@ -64,7 +64,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
           <h1 className="text-3xl md:text-5xl font-[900] text-white mb-2 tracking-tighter leading-tight uppercase">
             PAGALBOS SISTEMA
           </h1>
-          <p className="text-lg md:text-xl font-bold text-green-200 uppercase tracking-tight mb-6 opacity-90">
+          <p className="text-[10px] md:text-[11px] font-black text-green-200/60 uppercase tracking-[0.2em] mb-8">
             Vilniaus Antakalnio progimnazija
           </p>
           <div className="flex flex-wrap gap-3">

@@ -9,13 +9,14 @@ import {
   Sparkles, 
   Coffee, 
   Trash2, 
-  Activity,
   Heart,
   MessageSquare,
   ShieldCheck,
   Zap,
   Send,
-  Loader2
+  Loader2,
+  Waves,
+  BrainCircuit
 } from 'lucide-react';
 import { INITIAL_SPECIALISTS } from '../constants';
 
@@ -85,6 +86,7 @@ interface AIAssistantProps {
 const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) => {
   const [isActive, setIsActive] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isVoiceThinking, setIsVoiceThinking] = useState(false);
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     return saved ? JSON.parse(saved) : [{ role: 'bot', text: 'Sveiki. Esu Jūsų emocinė pagalvėlė. Galite man rašyti arba paspausti mikrofoną ir pasikalbėti balsu apie tai, kaip jaučiatės.' }];
@@ -136,6 +138,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
     for (const s of sourcesRef.current) s.stop();
     sourcesRef.current.clear();
     setIsActive(false);
+    setIsVoiceThinking(false);
   };
 
   const startSession = async () => {
@@ -175,9 +178,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
           onmessage: async (message: LiveServerMessage) => {
             if (message.serverContent?.inputTranscription) {
               setCurrentInput(prev => prev + message.serverContent!.inputTranscription!.text);
+              setIsVoiceThinking(true); // Vartotojas nustojo kalbėti, DI pradeda apdoroti
             }
             if (message.serverContent?.outputTranscription) {
               setCurrentOutput(prev => prev + message.serverContent!.outputTranscription!.text);
+              setIsVoiceThinking(false); // Atsakymas jau keliauja
             }
 
             if (message.serverContent?.turnComplete) {
@@ -188,6 +193,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
               ]);
               setCurrentInput('');
               setCurrentOutput('');
+              setIsVoiceThinking(false);
             }
 
             const base64Audio = message.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
@@ -208,6 +214,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
               for (const s of sourcesRef.current) s.stop();
               sourcesRef.current.clear();
               nextStartTimeRef.current = 0;
+              setIsVoiceThinking(false);
             }
           },
           onclose: () => setIsActive(false),
@@ -261,21 +268,21 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
 
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto bg-white rounded-[2.5rem] shadow-2xl border border-slate-100 overflow-hidden animate-in fade-in duration-700">
-      {/* Header */}
-      <div className={`p-6 transition-all duration-500 ${isActive ? 'bg-green-700' : 'bg-slate-900'} text-white relative`}>
+      {/* Header - Refined Typography */}
+      <div className={`p-8 transition-all duration-500 ${isActive ? 'bg-green-700' : 'bg-slate-900'} text-white relative`}>
         <div className="absolute top-0 right-0 p-8 opacity-10 pointer-events-none">
           <Sparkles size={140} />
         </div>
         
         <div className="relative z-10 flex items-center justify-between">
           <div className="flex items-center space-x-4">
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center border transition-all duration-500 ${isActive ? 'bg-white text-green-700 border-white/20 animate-pulse' : 'bg-white/10 text-amber-400 border-white/10'}`}>
-              {isActive ? <Activity size={24} /> : <Heart size={24} />}
+            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border transition-all duration-500 ${isActive ? 'bg-white text-green-700 border-white/20' : 'bg-white/10 text-amber-400 border-white/10'}`}>
+              {isActive ? <div className="animate-pulse"><Waves size={28} /></div> : <Heart size={28} />}
             </div>
             <div>
-              <h2 className="text-xl font-black tracking-tight uppercase leading-tight">DI EMOCINĖ PAGALVĖLĖ</h2>
-              <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50">
-                {isActive ? 'RYŠYS AKTYVUS | PAGALBASAU.LT' : 'TEKSTAS IR BALSAS'}
+              <h2 className="text-2xl font-[900] tracking-tight uppercase leading-tight">DI EMOCINĖ PAGALVĖLĖ</h2>
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                Vilniaus Antakalnio progimnazija
               </p>
             </div>
           </div>
@@ -283,24 +290,47 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
           <div className="flex items-center space-x-2">
             <button 
               onClick={clearHistory}
-              className="p-2.5 bg-white/5 hover:bg-rose-500/20 rounded-lg transition-all border border-white/5 text-white/60 hover:text-rose-200"
+              className="p-3 bg-white/5 hover:bg-rose-500/20 rounded-xl transition-all border border-white/5 text-white/60 hover:text-rose-200"
               title="Valyti istoriją"
             >
-              <Trash2 size={18} />
+              <Trash2 size={20} />
             </button>
             <button 
               onClick={() => setIsMuted(!isMuted)}
-              className={`p-2.5 rounded-lg transition-all border ${isMuted ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
+              className={`p-3 rounded-xl transition-all border ${isMuted ? 'bg-rose-500/20 text-rose-400 border-rose-500/30' : 'bg-white/5 text-white border-white/10 hover:bg-white/10'}`}
               title={isMuted ? 'Garsas išjungtas' : 'Garsas įjungtas'}
             >
-              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
+              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
             </button>
           </div>
         </div>
       </div>
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 scrollbar-thin">
+      <div className="flex-1 overflow-y-auto p-6 space-y-6 bg-slate-50/30 scrollbar-thin relative">
+        {/* Voice Feedback Overlays */}
+        {isActive && !isVoiceThinking && !currentOutput && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+            <div className="bg-green-700 text-white px-6 py-2 rounded-full shadow-2xl flex items-center space-x-3 border border-white/20 animate-in slide-in-from-top-4 duration-300">
+              <div className="flex space-x-1">
+                <div className="w-1 h-3 bg-white rounded-full animate-bounce delay-75"></div>
+                <div className="w-1 h-4 bg-white rounded-full animate-bounce delay-150"></div>
+                <div className="w-1 h-3 bg-white rounded-full animate-bounce delay-225"></div>
+              </div>
+              <span className="text-[10px] font-black uppercase tracking-widest">Klausausi...</span>
+            </div>
+          </div>
+        )}
+
+        {isVoiceThinking && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-20 pointer-events-none">
+            <div className="bg-amber-500 text-white px-6 py-2 rounded-full shadow-2xl flex items-center space-x-3 border border-white/20 animate-in slide-in-from-top-4 duration-300">
+              <BrainCircuit size={16} className="animate-spin" />
+              <span className="text-[10px] font-black uppercase tracking-widest">Apdorojama...</span>
+            </div>
+          </div>
+        )}
+
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in slide-in-from-bottom-2`}>
             <div className={`flex items-start space-x-3 max-w-[85%] ${msg.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
@@ -386,7 +416,12 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
               }`}
             >
               {isActive ? <MicOff size={20} /> : <Mic size={20} />}
-              {isActive && <span className="absolute -inset-1 border-2 border-rose-500/20 rounded-2xl animate-ping"></span>}
+              {isActive && (
+                <span className="absolute -inset-2 border-2 border-rose-500/20 rounded-2xl animate-ping"></span>
+              )}
+              {isActive && (
+                <span className="absolute -inset-4 border border-rose-500/10 rounded-2xl animate-ping delay-300"></span>
+              )}
             </button>
             <span className="text-[8px] font-black uppercase tracking-widest text-slate-400 mt-2">Balsas</span>
           </div>

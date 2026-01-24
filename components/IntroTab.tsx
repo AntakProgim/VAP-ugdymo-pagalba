@@ -39,7 +39,7 @@ const IntroTab: React.FC<IntroTabProps> = ({ setActiveTab }) => {
           <h1 className="text-3xl md:text-5xl font-[900] text-white mb-2 tracking-tighter leading-tight uppercase">
             PAGALBOS NUOSTATOS
           </h1>
-          <p className="text-lg md:text-xl font-bold text-green-200 uppercase tracking-tight opacity-90">
+          <p className="text-[10px] md:text-[11px] font-black text-green-200/60 uppercase tracking-[0.2em]">
             Vilniaus Antakalnio progimnazija
           </p>
         </div>
@@ -93,7 +93,7 @@ const IntroTab: React.FC<IntroTabProps> = ({ setActiveTab }) => {
                </div>
             </div>
             
-            <p className="font-black text-slate-900 uppercase tracking-tight text-lg">Šis dokumentas – tai mūsų bendruomenės susitarimas:</p>
+            <p className="font-black text-slate-900 uppercase tracking-tight text-lg">Bendruomenės susitarimas:</p>
             <ul className="list-none space-y-4 pl-0">
               <li className="flex items-center space-x-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
                 <div className="bg-green-500 p-1.5 rounded-lg text-white"><CheckCircle2 size={16} /></div>
