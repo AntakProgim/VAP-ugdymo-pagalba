@@ -6,7 +6,7 @@ import {
   Users, BookOpen, UserCheck, CloudRain, Snowflake, Info,
   PauseCircle, Ban, Skull, Siren, Diamond, AlertCircle,
   ChevronDown, Smile, ClipboardList, User, FileText, Activity,
-  MessageSquareText
+  MessageSquareText, ExternalLink
 } from 'lucide-react';
 
 interface ScenarioItem {
@@ -82,7 +82,7 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
     },
     {
       id: 'kaip-kalbeti',
-      title: 'Kaip kalbėti?',
+      title: 'Kaip kalbeti?',
       parent: 'suicidinis',
       icon: <User size={16} className="text-amber-500" />,
       scheme: [
@@ -144,7 +144,7 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
         'Kvapas. Alkoholio, tabako, specifinis marihuanos ar cheminių medžiagų kvapas.',
         'Asmenybės pokyčiai. Brandumo stoka, melavimas, vėlavimas, nepaaiškinama baimė.'
       ],
-      additional: 'Ilgalaikio vartojimo ženklai. Higienos stoka, raudonos akys, apetito pokyčiai, vengiama bendrauti.'
+      additional: 'Ilgalaikio vartojimo ženklai. Higienos stoka, raudonas akys, apetito pokyčiai, vengiama bendrauti.'
     },
     {
       id: 'smurtas',
@@ -348,18 +348,27 @@ const ScenariosTab: React.FC<ScenariosTabProps> = ({ setActiveTab, initialScenar
             </section>
           </div>
 
-          <div className="mt-auto pt-10 border-t flex flex-col sm:flex-row justify-between items-center gap-4">
+          <div className="mt-auto pt-10 border-t flex flex-col items-start gap-4">
             <div className="flex items-center space-x-3 text-xs text-gray-500 font-medium">
               <MessageSquareText size={18} className="text-blue-500 flex-shrink-0" />
               <span>Prireikus skubios pagalbos pamokos metu, rekomenduojame <a href="https://chat.google.com" target="_blank" className="text-blue-600 font-bold hover:underline">Google Chat</a> (tylu ir greita).</span>
             </div>
-            <button 
-              onClick={() => setActiveTab('contacts')}
-              className="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-green-700 transition-all flex items-center space-x-2 shadow-lg shadow-green-100"
-            >
-              <span>Visi specialistai</span>
-              <ChevronRight size={16} />
-            </button>
+            
+            <div className="flex items-center space-x-3 text-xs text-gray-500 font-medium">
+              <FileText size={18} className="text-green-600 flex-shrink-0" />
+              <span>Išsamų situacijų valdymo dokumentą galite rasti <a href="https://docs.google.com/document/d/108fN0vGKqQ8gP5I6hy4QgemoPIenAYZoq7fugSKMmrE/edit?usp=sharing" target="_blank" className="text-green-700 font-bold hover:underline">Google Docs</a> platformoje.</span>
+            </div>
+
+            <div className="w-full flex flex-col sm:flex-row justify-between items-center gap-4 mt-2">
+              <div className="hidden sm:block"></div>
+              <button 
+                onClick={() => setActiveTab('contacts')}
+                className="bg-green-600 text-white px-6 py-2.5 rounded-xl font-bold text-sm hover:bg-green-700 transition-all flex items-center space-x-2 shadow-lg shadow-green-100"
+              >
+                <span>Visi specialistai</span>
+                <ChevronRight size={16} />
+              </button>
+            </div>
           </div>
         </div>
       </div>
