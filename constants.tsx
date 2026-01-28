@@ -21,6 +21,7 @@ export const INITIAL_SPECIALISTS: Specialist[] = [
   { id: 'l3', name: 'Živilė Borisevič', category: SpecialistCategory.LOGOPEDAI, classes: '2 IR 5 KLASĖS', phone: '+37069261678', office: '14', email: 'zivile.borisevic@antakalnio.lt' },
   { id: 'l4', name: 'Lina Kumžienė', category: SpecialistCategory.LOGOPEDAI, classes: '2 KLASĖS', phone: '+37067266798', office: '19', email: 'lina.kumziene@antakalnio.lt' },
   { id: 'l5', name: 'Ginta Azguridienė', category: SpecialistCategory.LOGOPEDAI, classes: '4 KLASĖS', phone: '+37067256510', office: '8', email: 'ginta.azguridiene@antakalnio.lt' },
+  { id: 'l6', name: '[Naujas Logopedas]', category: SpecialistCategory.LOGOPEDAI, classes: '[Pildoma]', phone: '[Tel. numeris]', office: '[Kab. nr.]', email: 'logopedas@antakalnio.lt' },
 
   // Psichologai
   { id: 'p1', name: 'Vilma Dečkutė', category: SpecialistCategory.PSICHOLOGAI, classes: '5-8 KLASĖS (ir 1-4 kl.)', phone: '+37061817771', office: '42', email: 'vilma.deckute@antakalnio.lt' },
