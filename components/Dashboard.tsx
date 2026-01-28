@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { 
   MessageCircle, 
@@ -9,7 +10,10 @@ import {
   Phone,
   MessageSquareText,
   Trees,
-  CalendarDays
+  CalendarDays,
+  ExternalLink,
+  FileText,
+  ClipboardCheck
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -154,6 +158,38 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
           </div>
           <div className="bg-slate-900 rounded-[2rem] shadow-xl overflow-hidden flex flex-col">
             <div className="p-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
+              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">DOKUMENTAI IR PROTOKOLAI</p>
+            </div>
+            <div className="p-4 space-y-2">
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1zeU4z5XOLIEGqkgdyL041p_cb5vDpJ6DUCy1K_GYL7E/edit?usp=sharing" 
+                target="_blank" 
+                className="flex items-center p-3 rounded-xl bg-white/5 hover:bg-green-600/20 border border-white/5 hover:border-green-500/30 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center mr-3">
+                  <ClipboardCheck size={16} />
+                </div>
+                <span className="text-[11px] font-bold text-white/90 uppercase tracking-wide flex-1">
+                  Pedagogų rūpinimasis mokinių saugumu
+                </span>
+                <ExternalLink size={14} className="text-white/20 group-hover:text-white/60 transition-colors" />
+              </a>
+              <a 
+                href="https://docs.google.com/document/d/12wcUtUmljg_DSQd2MUeNuvzQL9mJaBL0hyvQ4bYtxcE/edit?usp=sharing" 
+                target="_blank" 
+                className="flex items-center p-3 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/5 hover:border-blue-500/30 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mr-3">
+                  <FileText size={16} />
+                </div>
+                <span className="text-[11px] font-bold text-white/90 uppercase tracking-wide flex-1">
+                  Mokyklos vadovų rūpinimasis mokinių saugumu
+                </span>
+                <ExternalLink size={14} className="text-white/20 group-hover:text-white/60 transition-colors" />
+              </a>
+            </div>
+
+            <div className="px-4 py-2 border-t border-white/5 bg-white/5">
               <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">MOKYKLOS VADOVAI</p>
             </div>
             <div className="p-3 space-y-1.5">
