@@ -14,17 +14,12 @@ import {
   Loader2,
   Waves,
   BrainCircuit,
-  Info,
-  MessageCircle,
   ShieldAlert,
-  ArrowUpRight,
-  HandHelping,
-  UserCheck,
   Ear,
-  BookOpen,
-  Siren,
-  ClipboardList,
-  Target
+  UserCheck,
+  MessageCircle,
+  Clock,
+  Layout
 } from 'lucide-react';
 import { INITIAL_SPECIALISTS, INITIAL_TEMPLATES } from '../constants';
 
@@ -85,6 +80,7 @@ interface Message {
   role: 'user' | 'bot';
   text: string;
   type?: 'text' | 'voice';
+  timestamp: string;
 }
 
 const QUICK_PROMPTS: Record<string, { label: string, prompt: string, icon: React.ReactNode }[]> = {
@@ -115,9 +111,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
   const [isGenerating, setIsGenerating] = useState(false);
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
+    const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
     return saved ? JSON.parse(saved) : [{ 
       role: 'bot', 
-      text: `Sveiki! Esu Jūsų DI emocinė pagalvėlė. Matau, kad domitės ${contextTab}. Kuo galiu padėti?` 
+      text: `Sveiki! Esu VAP DI emocinė pagalvėlė. Matau, kad domitės „${contextTab === 'dashboard' ? 'Apžvalga' : contextTab}“. Kaip galėčiau Jums padėti šią akimirką?`,
+      timestamp: now
     }];
   });
   
@@ -139,11 +137,16 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
     switch (contextTab) {
       case 'contacts': return `Specialistai: ${INITIAL_SPECIALISTS.map(s => s.name).join(', ')}.`;
       case 'templates': return `Laiškų kategorijos: ${Array.from(new Set(INITIAL_TEMPLATES.map(t => t.category))).join(', ')}.`;
-      default: return `Bendras mokyklos kontekstas.`;
+      default: return `Vilniaus Antakalnio progimnazijos kontekstas.`;
     }
   };
 
-  const systemPrompt = `Esi „DI emocinė pagalvėlė“. Teik emocinę paramą mokytojams. Kontekstas: ${getContextSpecificData()}. Atsakymai trumpi.`;
+  const systemPrompt = `Esi Vilniaus Antakalnio progimnazijos (VAP) skaitmeninis asistentas – „DI pagalvėlė“. 
+Tavo tikslas – teikti greitą, profesionalią ir empatišką pagalbą mokytojams bei personalui.
+Kontekstas: ${getContextSpecificData()}.
+Tavo tonas: mandagus, palaikantis, konstruktyvus, akademiškas, bet šiltas.
+Atsakymai: trumpi, aiškūs, orientuoti į konkrečių VAP procedūrų (UAK, PEPIS) paaiškinimą.
+Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusiraminimo techniką arba nurodyk psichologą.`;
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -199,10 +202,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
             scriptProcessor.connect(audioContextInRef.current!.destination);
           },
           onmessage: async (m: LiveServerMessage) => {
+            const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
             if (m.serverContent?.inputTranscription) setCurrentInput(p => p + m.serverContent!.inputTranscription!.text);
             if (m.serverContent?.outputTranscription) setCurrentOutput(p => p + m.serverContent!.outputTranscription!.text);
             if (m.serverContent?.turnComplete) {
-              setMessages(p => [...p, { role: 'user', text: currentInput || "...", type: 'voice' }, { role: 'bot', text: currentOutput || "...", type: 'voice' }]);
+              setMessages(p => [...p, { role: 'user', text: currentInput || "...", type: 'voice', timestamp: now }, { role: 'bot', text: currentOutput || "...", type: 'voice', timestamp: now }]);
               setCurrentInput(''); setCurrentOutput('');
             }
             const audio = m.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
@@ -235,8 +239,9 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
   const handleSendText = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputText.trim();
     if (!textToSend || isGenerating) return;
+    const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
     setInputText('');
-    setMessages(prev => [...prev, { role: 'user', text: textToSend, type: 'text' }]);
+    setMessages(prev => [...prev, { role: 'user', text: textToSend, type: 'text', timestamp: now }]);
     setIsGenerating(true);
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
@@ -244,122 +249,173 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
         model: 'gemini-3-flash-preview',
         contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nUžklausa: ${textToSend}` }] }]
       });
-      setMessages(prev => [...prev, { role: 'bot', text: response.text || "...", type: 'text' }]);
+      setMessages(prev => [...prev, { role: 'bot', text: response.text || "Atsiprašau, įvyko ryšio klaida.", type: 'text', timestamp: now }]);
     } catch (err) {
-      setMessages(prev => [...prev, { role: 'bot', text: "Ryšio klaida." }]);
+      setMessages(prev => [...prev, { role: 'bot', text: "Šiuo metu negaliu atsakyti. Patikrinkite ryšį.", timestamp: now }]);
     } finally { setIsGenerating(false); }
   };
 
   const activePrompts = QUICK_PROMPTS[contextTab] || QUICK_PROMPTS.dashboard;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto bg-white rounded-[1.5rem] shadow-xl border border-slate-100 overflow-hidden animate-in fade-in duration-300">
+    <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden transition-all duration-500">
       
-      {/* Mini Header */}
-      <div className={`px-6 py-4 transition-all duration-500 flex items-center justify-between ${isActive ? 'bg-emerald-700' : 'bg-slate-900'} text-white`}>
-        <div className="flex items-center space-x-3">
-          <div className={`w-10 h-10 rounded-xl flex items-center justify-center border transition-all ${isActive ? 'bg-white text-emerald-700 border-white/50' : 'bg-white/10 text-white/50 border-white/10'}`}>
-            {isActive ? <Waves size={20} className="animate-pulse" /> : <Sparkles size={18} />}
+      {/* Header with improved hierarchy */}
+      <div className={`px-8 py-5 flex items-center justify-between transition-all duration-1000 ${isActive ? 'bg-emerald-800' : 'bg-slate-900'} text-white relative overflow-hidden`}>
+        {isActive && (
+          <div className="absolute inset-0 bg-gradient-to-r from-emerald-700/50 to-emerald-900/50 animate-pulse pointer-events-none" />
+        )}
+        <div className="flex items-center space-x-5 relative z-10">
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'bg-white text-emerald-800 border-white/40 scale-105 rotate-3' : 'bg-white/10 text-white/50 border-white/10'}`}>
+            {isActive ? <Waves size={28} className="animate-pulse" /> : <Sparkles size={24} />}
           </div>
-          <div>
-            <h2 className="text-sm font-black tracking-tight uppercase leading-none">DI Pagalvėlė</h2>
-            <p className="text-[9px] font-black uppercase text-white/40 tracking-widest mt-1">Kontekstas: {contextTab}</p>
+          <div className="space-y-1">
+            <h2 className="text-base font-[900] tracking-tight uppercase leading-none">DI Pagalvėlė</h2>
+            <div className="flex items-center space-x-2">
+              <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
+              <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] leading-none">VAP ASISTENTAS</p>
+            </div>
           </div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <button onClick={() => { if(confirm("Išvalyti?")) setMessages([]); }} className="p-2 hover:bg-white/10 rounded-lg text-white/50 transition-colors">
-            <Trash2 size={16} />
+        <div className="flex items-center space-x-4 relative z-10">
+          <button 
+            onClick={() => { if(confirm("Ar tikrai norite ištrinti visą pokalbį?")) setMessages([]); }} 
+            className="p-3 hover:bg-white/10 rounded-2xl text-white/30 hover:text-white transition-all group"
+            title="Išvalyti"
+          >
+            <Trash2 size={20} className="group-hover:scale-110 transition-transform" />
           </button>
         </div>
       </div>
 
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4 bg-slate-50/30 scrollbar-thin">
-        {/* Compact Quick Prompts */}
-        <div className="flex space-x-2 overflow-x-auto pb-4 no-scrollbar">
+      {/* Main Conversation Area */}
+      <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8 bg-slate-50/10 scrollbar-thin">
+        {/* Quick Prompts - Floating Pills */}
+        <div className="flex space-x-3 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
           {activePrompts.map((p, i) => (
-            <button key={i} onClick={() => handleSendText(p.prompt)} className="flex-shrink-0 flex items-center space-x-2 px-3 py-2 bg-white border border-slate-200 rounded-xl text-[10px] font-black text-slate-600 hover:border-emerald-500 transition-all shadow-sm">
-              {p.icon} <span>{p.label}</span>
+            <button 
+              key={i} 
+              onClick={() => handleSendText(p.prompt)} 
+              className="flex-shrink-0 flex items-center space-x-3 px-5 py-3 bg-white border border-slate-200 rounded-2xl text-[10px] font-[800] text-slate-600 hover:border-emerald-600 hover:text-emerald-800 hover:shadow-lg hover:-translate-y-0.5 transition-all shadow-sm group"
+            >
+              <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-emerald-50 transition-colors">{p.icon}</div>
+              <span className="uppercase tracking-widest">{p.label}</span>
             </button>
           ))}
         </div>
 
-        <div className="space-y-4 max-w-3xl mx-auto">
+        <div className="space-y-8 max-w-3xl mx-auto">
           {messages.map((m, i) => (
-            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-              <div className={`flex items-start space-x-2 max-w-[85%] ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
-                <div className={`w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 text-xs ${m.role === 'user' ? 'bg-slate-900 text-white' : 'bg-emerald-50 text-emerald-700 border border-emerald-100'}`}>
-                  {m.role === 'user' ? <Zap size={14} /> : <Heart size={14} />}
+            <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-3 duration-500`}>
+              <div className={`flex items-end space-x-3 max-w-[88%] ${m.role === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                <div className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 text-xs shadow-md border-2 transition-transform hover:scale-110 ${m.role === 'user' ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-emerald-700 border-emerald-50'}`}>
+                  {m.role === 'user' ? <Zap size={18} /> : <Heart size={18} />}
                 </div>
-                <div className={`px-4 py-2.5 rounded-2xl text-sm font-bold leading-relaxed ${m.role === 'user' ? 'bg-slate-900 text-white rounded-tr-none' : 'bg-white text-slate-800 border border-slate-100 rounded-tl-none shadow-sm'}`}>
-                  {m.text}
-                  {m.type === 'voice' && <Ear size={10} className="mt-1 opacity-30" />}
+                <div className="flex flex-col space-y-1">
+                  <div className={`px-6 py-4 rounded-[1.75rem] text-[15px] font-bold leading-relaxed shadow-sm border ${m.role === 'user' ? 'bg-slate-900 text-white rounded-br-none border-slate-800' : 'bg-white text-slate-800 border-slate-100 rounded-bl-none'}`}>
+                    {m.text}
+                    {m.type === 'voice' && (
+                      <div className="mt-3 pt-3 flex items-center space-x-2 border-t border-current/10">
+                        <Ear size={12} className="opacity-30" />
+                        <span className="text-[9px] uppercase font-[900] tracking-[0.2em] opacity-30">Balso atpažinimas</span>
+                      </div>
+                    )}
+                  </div>
+                  <div className={`flex items-center space-x-1.5 px-2 text-[9px] font-black uppercase tracking-widest text-slate-300 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                    <Clock size={10} />
+                    <span>{m.timestamp}</span>
+                  </div>
                 </div>
               </div>
             </div>
           ))}
-          {isGenerating && <div className="flex justify-start"><Loader2 className="animate-spin text-emerald-600" size={16} /></div>}
+          {isGenerating && (
+            <div className="flex justify-start items-center space-x-4 animate-pulse">
+               <div className="w-10 h-10 rounded-2xl bg-emerald-50 flex items-center justify-center border border-emerald-100"><Loader2 className="animate-spin text-emerald-600" size={18} /></div>
+               <div className="space-y-1">
+                  <span className="text-[10px] font-[900] uppercase tracking-[0.3em] text-emerald-600/50">DI Pagalvėlė galvoja</span>
+                  <div className="flex space-x-1">
+                    <div className="w-1 h-1 bg-emerald-300 rounded-full animate-bounce" style={{animationDelay: '0s'}} />
+                    <div className="w-1 h-1 bg-emerald-300 rounded-full animate-bounce" style={{animationDelay: '0.1s'}} />
+                    <div className="w-1 h-1 bg-emerald-300 rounded-full animate-bounce" style={{animationDelay: '0.2s'}} />
+                  </div>
+               </div>
+            </div>
+          )}
           <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Modern Compact Controls */}
-      <div className="px-6 py-4 bg-white border-t border-slate-100">
-        <div className="flex items-center space-x-3 max-w-3xl mx-auto">
+      {/* Control Bar - Sleek Glassmorphism */}
+      <div className="px-8 py-8 bg-white border-t border-slate-100 shadow-[0_-15px_50px_rgba(0,0,0,0.03)] z-20">
+        <div className="max-w-3xl mx-auto space-y-6">
           
-          {/* Text Input */}
-          <div className="flex-1 relative">
-            <input
-              type="text"
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleSendText()}
-              placeholder="Rašykite arba klauskite..."
-              className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-3 text-sm font-bold outline-none focus:border-emerald-600 transition-all"
-            />
-            <button 
-              onClick={() => handleSendText()} 
-              disabled={!inputText.trim()} 
-              className={`absolute right-2 top-1/2 -translate-y-1/2 p-2 rounded-xl transition-all ${inputText.trim() ? 'bg-emerald-700 text-white' : 'text-slate-300'}`}
-            >
-              <Send size={18} />
-            </button>
+          <div className="flex items-center space-x-4">
+            {/* Input Bar */}
+            <div className="flex-1 relative group">
+              <input
+                type="text"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyDown={(e) => { if(e.key === 'Enter') handleSendText(); }}
+                placeholder="Rašykite klausimą čia..."
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-3xl px-8 py-5 text-[15px] font-[700] outline-none focus:border-emerald-600 focus:bg-white focus:shadow-xl focus:shadow-emerald-900/5 transition-all duration-300 placeholder-slate-300"
+              />
+              <button 
+                onClick={() => handleSendText()} 
+                disabled={!inputText.trim() || isGenerating} 
+                className={`absolute right-2.5 top-2.5 p-3.5 rounded-2xl transition-all transform active:scale-90 ${inputText.trim() ? 'bg-emerald-700 text-white shadow-lg hover:bg-emerald-800' : 'text-slate-300 cursor-not-allowed opacity-50'}`}
+              >
+                <Send size={22} />
+              </button>
+            </div>
+
+            {/* Interaction Buttons */}
+            <div className="flex items-center space-x-4">
+              <button 
+                onClick={() => setIsMuted(!isMuted)}
+                className={`w-14 h-14 rounded-3xl flex items-center justify-center transition-all border-2 active:scale-90 ${isMuted ? 'bg-rose-50 text-rose-600 border-rose-100 shadow-inner' : 'bg-slate-50 text-slate-400 hover:bg-slate-100 border-slate-100 hover:border-slate-300'}`}
+                title={isMuted ? "Garsas išjungtas" : "Garsas įjungtas"}
+              >
+                {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
+              </button>
+
+              <button 
+                onClick={isActive ? stopSession : startSession} 
+                className={`w-16 h-16 rounded-[2rem] flex items-center justify-center transition-all relative border-4 active:scale-95 ${isActive ? 'bg-rose-600 text-white border-rose-500 shadow-2xl shadow-rose-200 animate-pulse' : 'bg-emerald-700 text-white border-emerald-600 hover:bg-emerald-800 hover:scale-105 shadow-xl shadow-emerald-900/10'}`}
+                title={isActive ? "Išjungti balsą" : "Kalbėti balsu"}
+              >
+                {isActive ? <MicOff size={28} /> : <Mic size={28} />}
+                {isActive && (
+                  <div className="absolute -inset-3 border-4 border-rose-400/20 rounded-[2.5rem] animate-ping" />
+                )}
+              </button>
+            </div>
           </div>
 
-          {/* Voice & Sound Controls */}
-          <div className="flex items-center space-x-2">
-            <button 
-              onClick={() => setIsMuted(!isMuted)}
-              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all ${isMuted ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
-              title="Garsas"
-            >
-              {isMuted ? <VolumeX size={18} /> : <Volume2 size={18} />}
-            </button>
-
-            <button 
-              onClick={isActive ? stopSession : startSession} 
-              className={`w-11 h-11 rounded-xl flex items-center justify-center transition-all relative ${isActive ? 'bg-rose-600 text-white animate-pulse shadow-lg shadow-rose-200' : 'bg-emerald-700 text-white hover:bg-emerald-800'}`}
-              title="Balsas"
-            >
-              {isActive ? <MicOff size={18} /> : <Mic size={18} />}
-            </button>
-          </div>
-
+          {/* Real-time Status Overlay */}
+          {isActive && (currentInput || currentOutput) && (
+            <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100/50 animate-in fade-in slide-in-from-bottom-4 duration-700 flex items-start space-x-4 shadow-sm backdrop-blur-sm">
+               <div className="bg-emerald-600 p-3 rounded-2xl text-white shadow-lg shadow-emerald-200/50 mt-0.5">
+                  <Waves size={20} className="animate-pulse" />
+               </div>
+               <div className="flex-1 space-y-2">
+                  <div className="flex items-center justify-between">
+                     <span className="text-[10px] font-[900] uppercase text-emerald-800 tracking-[0.25em]">DI Ryšys: Aktyvi transkripcija</span>
+                     <div className="flex space-x-1 items-end h-3">
+                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0s]" style={{height: '40%'}} />
+                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0.2s]" style={{height: '90%'}} />
+                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0.4s]" style={{height: '60%'}} />
+                     </div>
+                  </div>
+                  <p className="text-[14px] font-[700] text-emerald-900 leading-snug italic">
+                    „{currentOutput || currentInput || "Klausau Jūsų, kalbėkite..."}“
+                  </p>
+               </div>
+            </div>
+          )}
         </div>
-        
-        {/* Dynamic Transcription Overlay (while recording) */}
-        {isActive && (currentInput || currentOutput) && (
-          <div className="mt-3 p-3 bg-emerald-50 rounded-xl border border-emerald-100 max-w-3xl mx-auto animate-in fade-in slide-in-from-bottom-2">
-             <div className="flex items-center space-x-2 mb-1">
-                <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-ping" />
-                <span className="text-[9px] font-black uppercase text-emerald-800 tracking-widest">DI Klauso / Kalba</span>
-             </div>
-             <p className="text-[12px] font-bold text-emerald-900 leading-tight">
-               {currentOutput || currentInput || "..."}
-             </p>
-          </div>
-        )}
       </div>
 
       <style>{`

@@ -29,7 +29,7 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
       icon: <MessageCircle size={18} />, 
       bg: 'bg-green-50 text-green-700',
       external: true,
-      url: 'https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?usp=sharing'
+      url: 'https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?tab=t.qschqx6t8w1'
     },
     { id: 'contacts', label: 'Specialistai', value: '20', icon: <Users size={18} />, bg: 'bg-blue-50 text-blue-700' },
     { id: 'contacts', label: 'Vadovai', value: '5', icon: <Zap size={18} />, bg: 'bg-amber-50 text-amber-600' },
@@ -147,7 +147,6 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
             </div>
           </div>
 
-          {/* DOKUMENTAI IR PROTOKOLAI dalis - be antraštės teksto */}
           <div className="bg-slate-950 rounded-[1.8rem] shadow-xl overflow-hidden flex flex-col border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-700">
             <div className="p-4 space-y-2.5">
               <a 

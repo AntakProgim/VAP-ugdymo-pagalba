@@ -4,13 +4,13 @@ import {
   Phone, 
   AlertTriangle,
   BookOpen,
-  ExternalLink,
   Sparkles,
   Siren,
   Trees,
   Database,
   LayoutGrid,
-  FileText
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -30,6 +30,9 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const handleNavClick = (id: string) => {
     setActiveTab(id);
   };
+
+  const TEMPLATES_URL = 'https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?tab=t.qschqx6t8w1';
+  const REGISTRAI_URL = 'https://antakalnio.lt/paslaugos/registrai';
 
   return (
     <aside className="w-60 bg-white border-r border-slate-200 h-screen sticky top-0 hidden lg:flex flex-col z-40 shadow-sm">
@@ -104,29 +107,28 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
             <span className="text-[12px] font-bold flex-1 text-left">112 Pagalba</span>
           </button>
 
-          {/* Letter Templates - Moved down above Registrai */}
+          {/* Letter Templates */}
           <button
-            onClick={() => handleNavClick('templates')}
-            className={`w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-all group ${
-              activeTab === 'templates' 
-                ? 'bg-emerald-700 text-white shadow-md' 
-                : 'text-slate-500 hover:text-emerald-700 hover:bg-emerald-50'
-            }`}
+            onClick={() => window.open(TEMPLATES_URL, '_blank')}
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-all group"
           >
-            <div className={`p-1.5 rounded-md transition-colors ${activeTab === 'templates' ? 'bg-white/20' : 'bg-slate-50 group-hover:bg-emerald-100'}`}>
-              <FileText size={14} className={activeTab === 'templates' ? 'text-white' : 'text-slate-400 group-hover:text-emerald-600'} />
+            <div className="p-1.5 bg-slate-50 rounded-md group-hover:bg-emerald-100 transition-colors">
+              <FileText size={14} className="text-slate-400 group-hover:text-emerald-600" />
             </div>
             <span className="text-[12px] font-bold flex-1 text-left">Laiškų šablonai</span>
+            <ExternalLink size={10} className="text-slate-300 group-hover:text-emerald-400" />
           </button>
 
+          {/* Registrai */}
           <button
-            onClick={() => window.open('https://antakalnio.lt/paslaugos/registrai', '_blank')}
-            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-50 transition-all group"
+            onClick={() => window.open(REGISTRAI_URL, '_blank')}
+            className="w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-500 hover:text-emerald-700 hover:bg-emerald-50 transition-all group"
           >
-            <div className="p-1.5 bg-slate-50 rounded-md">
-              <Database size={14} className="text-slate-400 group-hover:text-slate-900" />
+            <div className="p-1.5 bg-slate-50 rounded-md group-hover:bg-emerald-100 transition-colors">
+              <Database size={14} className="text-slate-400 group-hover:text-emerald-600" />
             </div>
             <span className="text-[12px] font-bold flex-1 text-left">Registrai</span>
+            <ExternalLink size={10} className="text-slate-300 group-hover:text-emerald-400" />
           </button>
         </div>
       </nav>
