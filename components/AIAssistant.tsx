@@ -114,7 +114,7 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
     const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
     return saved ? JSON.parse(saved) : [{ 
       role: 'bot', 
-      text: `Sveiki! Esu VAP DI emocinė pagalvėlė. Matau, kad domitės „${contextTab === 'dashboard' ? 'Apžvalga' : contextTab}“. Kaip galėčiau Jums padėti šią akimirką?`,
+      text: `Sveiki! Esu VAP DI emocinė pagalvėlė. Matau, kad domitės emocine pagalba. Kaip galėčiau Jums padėti šią akimirką?`,
       timestamp: now
     }];
   });

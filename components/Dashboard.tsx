@@ -12,7 +12,8 @@ import {
   CalendarDays,
   ExternalLink,
   FileText,
-  ClipboardCheck
+  ClipboardCheck,
+  Sparkles
 } from 'lucide-react';
 
 interface DashboardProps {
@@ -90,6 +91,14 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
               className="bg-green-600/30 text-white border border-white/20 px-6 py-2.5 rounded-xl font-black hover:bg-green-600/50 transition-all text-[10px] flex items-center shadow-sm"
             >
               PROCESŲ SCHEMOS
+            </button>
+            {/* Moved AI Help Button here */}
+            <button 
+              onClick={() => setActiveTab('ai-assistant')}
+              className="bg-amber-500 text-white px-6 py-2.5 rounded-xl font-black hover:bg-amber-600 transition-all text-[10px] flex items-center shadow-lg shadow-amber-900/20"
+            >
+              REIKIA PAGALBOS? (DI)
+              <Sparkles size={12} className="ml-2" />
             </button>
           </div>
         </div>
@@ -189,8 +198,8 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
             </h2>
           </div>
           
-          <div className="bg-white rounded-[1.8rem] border border-slate-100 shadow-sm overflow-hidden">
-            <div className="p-2 space-y-1.5">
+          <div className="bg-white rounded-[1.8rem] border border-slate-100 shadow-sm overflow-hidden flex-1">
+            <div className="p-2 space-y-1.5 h-full">
               {dutySchedule.map((item, idx) => (
                 <div key={idx} className="bg-slate-50/50 p-3 rounded-xl flex items-center justify-between border border-slate-100/50 hover:bg-slate-50 transition-colors group">
                   <div className="flex items-center space-x-3">
@@ -221,28 +230,13 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
                   </div>
                 </div>
               ))}
+              
+              <div className="p-4 mt-2">
+                <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                  * Budintys asmenys atsakingi už operatyvų reagavimą į skubius iškvietimus per pamokas.
+                </p>
+              </div>
             </div>
-            
-            <div className="p-4 bg-slate-50 border-t border-slate-100">
-              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
-                * Budintys asmenys atsakingi už operatyvų reagavimą į skubius iškvietimus per pamokas.
-              </p>
-            </div>
-          </div>
-
-          {/* Quick Support Badge */}
-          <div className="p-6 bg-indigo-50 rounded-[1.8rem] border border-indigo-100 relative overflow-hidden group">
-            <Zap className="absolute -right-2 -bottom-2 text-indigo-200/50 scale-150 rotate-12" size={80} />
-            <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-2 relative z-10">Reikia pagalbos?</p>
-            <p className="text-[11px] text-indigo-700 font-bold mb-4 leading-relaxed relative z-10">
-              Jei situacija neaiški, pasinaudokite DI Pagalvėle arba kreipkitės tiesiogiai į specialistus.
-            </p>
-            <button 
-              onClick={() => setActiveTab('ai-assistant')}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200 hover:-translate-y-0.5 transition-all relative z-10"
-            >
-              Klausti DI
-            </button>
           </div>
         </div>
       </div>
