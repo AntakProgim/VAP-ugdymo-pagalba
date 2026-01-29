@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { 
   MessageCircle, 
@@ -25,15 +24,15 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
   const stats = [
     { 
       id: 'templates-link', 
-      label: 'Laiškų šablonai', 
-      value: '29', 
-      icon: <MessageCircle size={20} />, 
+      label: 'Šablonai', 
+      value: '31', 
+      icon: <MessageCircle size={18} />, 
       bg: 'bg-green-50 text-green-700',
       external: true,
       url: 'https://docs.google.com/document/d/171tuL9pKuBYC376oxjoqmdM9NSqfAsinSpHJoyk2m8Y/edit?usp=sharing'
     },
-    { id: 'contacts', label: 'Specialistai', value: '20', icon: <Users size={20} />, bg: 'bg-blue-50 text-blue-700' },
-    { id: 'contacts', label: 'Mokyklos vadovai', value: '5', icon: <Zap size={20} />, bg: 'bg-amber-50 text-amber-600' },
+    { id: 'contacts', label: 'Specialistai', value: '20', icon: <Users size={18} />, bg: 'bg-blue-50 text-blue-700' },
+    { id: 'contacts', label: 'Vadovai', value: '5', icon: <Zap size={18} />, bg: 'bg-amber-50 text-amber-600' },
   ];
 
   const dutySchedule = [
@@ -59,38 +58,36 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
   };
 
   return (
-    <div className="space-y-6 pb-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      {/* Hero Section - Refined Typography */}
-      <div className="relative bg-green-700 rounded-[2rem] overflow-hidden border border-green-800 shadow-xl shadow-green-900/10">
-        <div className="absolute top-0 right-0 p-4 opacity-[0.07] text-white pointer-events-none translate-x-12 -translate-y-12 rotate-12">
-          <div className="bg-white/20 p-20 rounded-[5rem]">
-            <Trees size={340} />
-          </div>
+    <div className="space-y-5 pb-8 animate-in fade-in duration-500">
+      {/* Hero Section - Compact Height */}
+      <div className="relative bg-green-700 rounded-[1.5rem] overflow-hidden border border-green-800 shadow-md">
+        <div className="absolute top-0 right-0 p-4 opacity-[0.05] text-white pointer-events-none translate-x-12 -translate-y-12 rotate-12">
+          <Trees size={260} />
         </div>
         
-        <div className="relative z-10 p-8 md:p-12 flex flex-col items-start max-w-2xl">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-green-600/50 backdrop-blur-md border border-white/10 rounded-full mb-6">
-            <span className="text-[9px] font-extrabold uppercase tracking-widest text-green-100">
-              Bendruomenės Pagalbos Portalas
+        <div className="relative z-10 p-8 flex flex-col items-start max-w-2xl">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 bg-green-600/40 border border-white/10 rounded-full mb-4">
+            <span className="text-[8px] font-black uppercase tracking-widest text-green-100">
+              Bendruomenės Portalo Apžvalga
             </span>
           </div>
-          <h1 className="text-3xl md:text-5xl font-[900] text-white mb-2 tracking-tighter leading-tight uppercase">
+          <h1 className="text-2xl md:text-3xl font-black text-white mb-1 tracking-tight uppercase">
             PAGALBOS SISTEMA
           </h1>
-          <p className="text-[10px] md:text-[11px] font-black text-green-200/60 uppercase tracking-[0.2em] mb-8">
+          <p className="text-[9px] font-bold text-green-200/50 uppercase tracking-[0.2em] mb-6">
             Vilniaus Antakalnio progimnazija
           </p>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-2">
             <button 
               onClick={() => setActiveTab('scenarios')}
-              className="bg-white text-green-700 px-8 py-3.5 rounded-xl font-black hover:bg-green-50 transition-all text-xs flex items-center shadow-lg hover:-translate-y-0.5"
+              className="bg-white text-green-700 px-6 py-2.5 rounded-xl font-black hover:bg-green-50 transition-all text-[10px] flex items-center shadow-sm"
             >
               SITUACIJŲ VALDYMAS
-              <ChevronRight size={14} className="ml-2" />
+              <ChevronRight size={12} className="ml-2" />
             </button>
             <button 
               onClick={() => setActiveTab('schemes')}
-              className="bg-green-600/40 text-white border border-white/20 px-8 py-3.5 rounded-xl font-black hover:bg-green-600/60 transition-all text-xs flex items-center shadow-sm"
+              className="bg-green-600/30 text-white border border-white/20 px-6 py-2.5 rounded-xl font-black hover:bg-green-600/50 transition-all text-[10px] flex items-center shadow-sm"
             >
               PROCESŲ SCHEMOS
             </button>
@@ -98,123 +95,155 @@ const Dashboard: React.FC<DashboardProps> = ({ setActiveTab, onSelectScenario })
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Stats Grid - Compact */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         {stats.map((stat, idx) => (
           <button 
             key={idx} 
             onClick={() => handleStatClick(stat)}
-            className="bg-white p-6 rounded-[1.5rem] border border-slate-100 shadow-sm flex items-center space-x-5 hover:border-green-200 hover:-translate-y-1 transition-all text-left group"
+            className="bg-white p-4 rounded-2xl border border-slate-100 shadow-sm flex items-center space-x-4 hover:border-green-200 transition-all text-left"
           >
-            <div className={`p-4 ${stat.bg} rounded-xl group-hover:scale-110 transition-transform duration-300`}>
+            <div className={`p-3 ${stat.bg} rounded-xl`}>
               {stat.icon}
             </div>
             <div>
-              <p className="text-[9px] text-slate-400 font-extrabold uppercase tracking-widest mb-0.5">{stat.label}</p>
-              <p className="text-2xl font-black text-slate-900 leading-none">{stat.value}</p>
+              <p className="text-[8px] text-slate-400 font-black uppercase tracking-widest mb-0.5">{stat.label}</p>
+              <p className="text-xl font-black text-slate-900 leading-none">{stat.value}</p>
             </div>
           </button>
         ))}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-7 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-black text-slate-900 flex items-center uppercase tracking-tight">
-              <AlertCircle className="text-rose-500 mr-2" size={20} />
-              Kritiniai atvejai
-            </h2>
-            <button onClick={() => setActiveTab('scenarios')} className="text-[11px] font-bold text-green-700 hover:underline">Algoritmai →</button>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-3">
-            {criticalCases.map((item, idx) => (
-              <div 
-                key={idx} 
-                onClick={() => onSelectScenario(item.id)}
-                className="group bg-white p-5 rounded-[1.5rem] border border-slate-100 shadow-sm hover:border-green-100 hover:shadow-md transition-all cursor-pointer flex items-center justify-between"
-              >
-                <div className="flex items-center space-x-4">
-                  <div className={`w-1.5 h-8 rounded-full bg-${item.color}-500/30 flex-shrink-0 group-hover:h-10 transition-all duration-300`}></div>
-                  <div>
-                    <h4 className="font-extrabold text-slate-900 text-sm mb-0.5">{item.title}</h4>
-                    <p className="text-[11px] text-slate-400 font-medium truncate max-w-[200px] sm:max-w-xs">{item.desc}</p>
+        {/* Left Column - Main Action Section */}
+        <div className="lg:col-span-7 space-y-6">
+          <div className="space-y-3">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-sm font-black text-slate-900 flex items-center uppercase tracking-tight">
+                <AlertCircle className="text-rose-500 mr-2" size={16} />
+                Kritiniai atvejai
+              </h2>
+            </div>
+            
+            <div className="grid grid-cols-1 gap-2">
+              {criticalCases.map((item, idx) => (
+                <div 
+                  key={idx} 
+                  onClick={() => onSelectScenario(item.id)}
+                  className="group bg-white p-4 rounded-2xl border border-slate-100 shadow-sm hover:border-green-100 transition-all cursor-pointer flex items-center justify-between"
+                >
+                  <div className="flex items-center space-x-3">
+                    <div className={`w-1 h-6 rounded-full bg-${item.color}-500/30`}></div>
+                    <div>
+                      <h4 className="font-bold text-slate-900 text-xs">{item.title}</h4>
+                      <p className="text-[10px] text-slate-400 font-medium truncate max-w-[180px] sm:max-w-xs">{item.desc}</p>
+                    </div>
                   </div>
-                </div>
-                <div className="p-2 bg-slate-50 rounded-lg group-hover:bg-green-700 group-hover:text-white text-slate-300 transition-all">
-                  <ArrowRight size={16} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="lg:col-span-5 space-y-4">
-          <div className="flex items-center justify-between px-2">
-            <h2 className="text-lg font-black text-slate-900 flex items-center uppercase tracking-tight">
-              <CalendarDays size={20} className="text-green-600 mr-2" />
-              RŪPINIMASIS SAUGUMU
-            </h2>
-          </div>
-          <div className="bg-slate-900 rounded-[2rem] shadow-xl overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-white/5 bg-white/5 backdrop-blur-md">
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">DOKUMENTAI IR PROTOKOLAI</p>
-            </div>
-            <div className="p-4 space-y-2">
-              <a 
-                href="https://docs.google.com/spreadsheets/d/1zeU4z5XOLIEGqkgdyL041p_cb5vDpJ6DUCy1K_GYL7E/edit?usp=sharing" 
-                target="_blank" 
-                className="flex items-center p-3 rounded-xl bg-white/5 hover:bg-green-600/20 border border-white/5 hover:border-green-500/30 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-green-500/10 text-green-400 flex items-center justify-center mr-3">
-                  <ClipboardCheck size={16} />
-                </div>
-                <span className="text-[11px] font-bold text-white/90 uppercase tracking-wide flex-1">
-                  Pedagogų rūpinimasis mokinių saugumu
-                </span>
-                <ExternalLink size={14} className="text-white/20 group-hover:text-white/60 transition-colors" />
-              </a>
-              <a 
-                href="https://docs.google.com/document/d/12wcUtUmljg_DSQd2MUeNuvzQL9mJaBL0hyvQ4bYtxcE/edit?usp=sharing" 
-                target="_blank" 
-                className="flex items-center p-3 rounded-xl bg-white/5 hover:bg-blue-600/20 border border-white/5 hover:border-blue-500/30 transition-all group"
-              >
-                <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-400 flex items-center justify-center mr-3">
-                  <FileText size={16} />
-                </div>
-                <span className="text-[11px] font-bold text-white/90 uppercase tracking-wide flex-1">
-                  Mokyklos vadovų rūpinimasis mokinių saugumu
-                </span>
-                <ExternalLink size={14} className="text-white/20 group-hover:text-white/60 transition-colors" />
-              </a>
-            </div>
-
-            <div className="px-4 py-2 border-t border-white/5 bg-white/5">
-              <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">MOKYKLOS VADOVAI</p>
-            </div>
-            <div className="p-3 space-y-1.5">
-              {dutySchedule.map((item, idx) => (
-                <div key={idx} className="bg-white/5 hover:bg-white/10 p-3 rounded-xl border border-white/5 transition-all group/card">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <div className="w-8 h-8 rounded-lg bg-green-700 text-white flex items-center justify-center text-[10px] font-black">{item.day}</div>
-                      <div>
-                        <p className="text-xs font-extrabold text-white">{item.name}</p>
-                        <p className="text-[8px] text-white/30 font-bold uppercase tracking-widest">Kab. {item.office}</p>
-                      </div>
-                    </div>
-                    <div className="flex space-x-1.5">
-                      <a href={`tel:${item.phone}`} className="p-2 bg-green-500/10 text-green-400 rounded-lg hover:bg-green-600 hover:text-white transition-all border border-green-500/20">
-                        <Phone size={14} />
-                      </a>
-                      <a href={`https://chat.google.com/u/0/dm/${item.email}`} target="_blank" className="p-2 bg-blue-500/10 text-blue-400 rounded-lg hover:bg-blue-600 hover:text-white transition-all border border-blue-500/20">
-                        <MessageSquareText size={14} />
-                      </a>
-                    </div>
+                  <div className="p-1.5 bg-slate-50 rounded-lg group-hover:bg-green-700 group-hover:text-white text-slate-300 transition-all">
+                    <ArrowRight size={14} />
                   </div>
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* DOKUMENTAI IR PROTOKOLAI dalis - be antraštės teksto */}
+          <div className="bg-slate-950 rounded-[1.8rem] shadow-xl overflow-hidden flex flex-col border border-slate-800 animate-in fade-in slide-in-from-top-2 duration-700">
+            <div className="p-4 space-y-2.5">
+              <a 
+                href="https://docs.google.com/spreadsheets/d/1zeU4z5XOLIEGqkgdyL041p_cb5vDpJ6DUCy1K_GYL7E/edit?usp=sharing" 
+                target="_blank" 
+                className="flex items-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all group border border-white/5"
+              >
+                <div className="p-2.5 bg-green-500/10 rounded-xl mr-4 group-hover:bg-green-500/20 transition-colors">
+                  <ClipboardCheck size={20} className="text-green-400" />
+                </div>
+                <span className="text-[10px] font-black text-white uppercase tracking-wider flex-1 leading-tight">
+                  PEDAGOGŲ RŪPINIMASIS MOKINIŲ SAUGUMU
+                </span>
+                <ExternalLink size={16} className="text-white/20 group-hover:text-white/40 transition-colors" />
+              </a>
+              
+              <a 
+                href="https://docs.google.com/document/d/12wcUtUmljg_DSQd2MUeNuvzQL9mJaBL0hyvQ4bYtxcE/edit?usp=sharing" 
+                target="_blank" 
+                className="flex items-center p-4 rounded-2xl bg-white/5 hover:bg-white/10 transition-all group border border-white/5"
+              >
+                <div className="p-2.5 bg-blue-500/10 rounded-xl mr-4 group-hover:bg-blue-500/20 transition-colors">
+                  <FileText size={20} className="text-blue-400" />
+                </div>
+                <span className="text-[10px] font-black text-white uppercase tracking-wider flex-1 leading-tight">
+                  MOKYKLOS VADOVŲ RŪPINIMASIS MOKINIŲ SAUGUMU
+                </span>
+                <ExternalLink size={16} className="text-white/20 group-hover:text-white/40 transition-colors" />
+              </a>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Column - Secondary Information Section */}
+        <div className="lg:col-span-5 space-y-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-sm font-black text-slate-900 flex items-center uppercase tracking-tight">
+              <CalendarDays size={16} className="text-green-600 mr-2" />
+              Mokinių saugumo užtikrinimo grafikas
+            </h2>
+          </div>
+          
+          <div className="bg-white rounded-[1.8rem] border border-slate-100 shadow-sm overflow-hidden">
+            <div className="p-2 space-y-1.5">
+              {dutySchedule.map((item, idx) => (
+                <div key={idx} className="bg-slate-50/50 p-3 rounded-xl flex items-center justify-between border border-slate-100/50 hover:bg-slate-50 transition-colors group">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 rounded-xl bg-green-700 text-white flex items-center justify-center text-[10px] font-black shadow-sm group-hover:scale-110 transition-transform">
+                      {item.day}
+                    </div>
+                    <div>
+                      <p className="text-[11px] font-black text-slate-800 leading-none mb-1">{item.name}</p>
+                      <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tight leading-none">Kabinetas: {item.office}</p>
+                    </div>
+                  </div>
+                  <div className="flex space-x-1">
+                    <a 
+                      href={`tel:${item.phone}`} 
+                      className="p-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-700 hover:text-white transition-all shadow-sm"
+                      title="Skambinti"
+                    >
+                      <Phone size={12} />
+                    </a>
+                    <a 
+                      href={`https://chat.google.com/u/0/dm/${item.email}`} 
+                      target="_blank" 
+                      className="p-2 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-700 hover:text-white transition-all shadow-sm"
+                      title="Google Chat"
+                    >
+                      <MessageSquareText size={12} />
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+            
+            <div className="p-4 bg-slate-50 border-t border-slate-100">
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-relaxed">
+                * Budintys asmenys atsakingi už operatyvų reagavimą į skubius iškvietimus per pamokas.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Support Badge */}
+          <div className="p-6 bg-indigo-50 rounded-[1.8rem] border border-indigo-100 relative overflow-hidden group">
+            <Zap className="absolute -right-2 -bottom-2 text-indigo-200/50 scale-150 rotate-12" size={80} />
+            <p className="text-[10px] font-black text-indigo-900 uppercase tracking-widest mb-2 relative z-10">Reikia pagalbos?</p>
+            <p className="text-[11px] text-indigo-700 font-bold mb-4 leading-relaxed relative z-10">
+              Jei situacija neaiški, pasinaudokite DI Pagalvėle arba kreipkitės tiesiogiai į specialistus.
+            </p>
+            <button 
+              onClick={() => setActiveTab('ai-assistant')}
+              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-indigo-200 hover:-translate-y-0.5 transition-all relative z-10"
+            >
+              Klausti DI
+            </button>
           </div>
         </div>
       </div>
