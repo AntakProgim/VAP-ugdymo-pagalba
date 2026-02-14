@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { GoogleGenAI, LiveServerMessage, Modality } from "@google/genai";
+import { GoogleGenAI, Modality } from "@google/genai";
 import { 
-  Mic, 
-  MicOff, 
   Volume2, 
   VolumeX, 
   Sparkles, 
@@ -15,24 +13,13 @@ import {
   Waves,
   BrainCircuit,
   ShieldAlert,
-  Ear,
   UserCheck,
-  MessageCircle,
   Clock,
-  Layout
+  Speaker
 } from 'lucide-react';
 import { INITIAL_SPECIALISTS, INITIAL_TEMPLATES } from '../constants';
 
 // --- Audio Helper Functions ---
-function encode(bytes: Uint8Array) {
-  let binary = '';
-  const len = bytes.byteLength;
-  for (let i = 0; i < len; i++) {
-    binary += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binary);
-}
-
 function decode(base64: string) {
   const binaryString = atob(base64);
   const len = binaryString.length;
@@ -62,24 +49,11 @@ async function decodeAudioData(
   return buffer;
 }
 
-function createBlob(data: Float32Array): { data: string; mimeType: string } {
-  const l = data.length;
-  const int16 = new Int16Array(l);
-  for (let i = 0; i < l; i++) {
-    int16[i] = data[i] * 32768;
-  }
-  return {
-    data: encode(new Uint8Array(int16.buffer)),
-    mimeType: 'audio/pcm;rate=16000',
-  };
-}
-
-const STORAGE_KEY = 'vap_ai_live_transcripts_v6';
+const STORAGE_KEY = 'vap_ai_text_history_v7';
 
 interface Message {
   role: 'user' | 'bot';
   text: string;
-  type?: 'text' | 'voice';
   timestamp: string;
 }
 
@@ -107,8 +81,8 @@ interface AIAssistantProps {
 }
 
 const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) => {
-  const [isActive, setIsActive] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
   const [messages, setMessages] = useState<Message[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
     const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
@@ -121,17 +95,11 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
   
   const [isMuted, setIsMuted] = useState(false);
   const [inputText, setInputText] = useState('');
-  const [currentInput, setCurrentInput] = useState('');
-  const [currentOutput, setCurrentOutput] = useState('');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const liveSessionRef = useRef<any>(null);
-  const audioContextInRef = useRef<AudioContext | null>(null);
   const audioContextOutRef = useRef<AudioContext | null>(null);
   const gainNodeRef = useRef<GainNode | null>(null);
-  const nextStartTimeRef = useRef(0);
   const sourcesRef = useRef<Set<AudioBufferSourceNode>>(new Set());
-  const micStreamRef = useRef<MediaStream | null>(null);
 
   const getContextSpecificData = () => {
     switch (contextTab) {
@@ -144,9 +112,14 @@ const AIAssistant: React.FC<AIAssistantProps> = ({ contextTab = 'dashboard' }) =
   const systemPrompt = `Esi Vilniaus Antakalnio progimnazijos (VAP) skaitmeninis asistentas – „DI pagalvėlė“. 
 Tavo tikslas – teikti greitą, profesionalią ir empatišką pagalbą mokytojams bei personalui.
 Kontekstas: ${getContextSpecificData()}.
+
+Svarbios taisyklės:
+1. Visada naudok bendrinį terminą „el. dienynas“ (niekada neminėk TAMO, nes mokykla naudoja „Mano dienynas“).
+2. Emocinės sveikatos ir psichologinės pagalbos klausimais remkis ir rekomenduok nacionalinę platformą https://pagalbasau.lt/.
+
 Tavo tonas: mandagus, palaikantis, konstruktyvus, akademiškas, bet šiltas.
 Atsakymai: trumpi, aiškūs, orientuoti į konkrečių VAP procedūrų (UAK, PEPIS) paaiškinimą.
-Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusiraminimo techniką arba nurodyk psichologą.`;
+Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusiraminimo techniką, nurodyk mokyklos psichologą arba nukreipk į pagalbasau.lt.`;
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
@@ -157,102 +130,106 @@ Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusi
     if (gainNodeRef.current) {
       gainNodeRef.current.gain.setTargetAtTime(isMuted ? 0 : 1, audioContextOutRef.current?.currentTime || 0, 0.1);
     }
+    // Stop audio if muted
+    if (isMuted) {
+      stopAudio();
+    }
   }, [isMuted]);
 
-  const stopSession = () => {
-    if (liveSessionRef.current) { liveSessionRef.current.close(); liveSessionRef.current = null; }
-    if (micStreamRef.current) { micStreamRef.current.getTracks().forEach(t => t.stop()); micStreamRef.current = null; }
+  const stopAudio = () => {
     sourcesRef.current.forEach(s => { try { s.stop(); } catch(e){} });
     sourcesRef.current.clear();
-    setIsActive(false);
+    setIsPlayingAudio(false);
   };
 
-  const startSession = async () => {
+  const playResponseAudio = async (text: string) => {
+    if (isMuted) return;
+    
     try {
-      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-      if (!audioContextInRef.current) audioContextInRef.current = new AudioContext({ sampleRate: 16000 });
+      setIsPlayingAudio(true);
+      
+      // Initialize Audio Context on user interaction if needed
       if (!audioContextOutRef.current) {
-        audioContextOutRef.current = new AudioContext({ sampleRate: 24000 });
+        audioContextOutRef.current = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 24000 });
         gainNodeRef.current = audioContextOutRef.current.createGain();
         gainNodeRef.current.connect(audioContextOutRef.current.destination);
+      } else if (audioContextOutRef.current.state === 'suspended') {
+        await audioContextOutRef.current.resume();
       }
-      
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      micStreamRef.current = stream;
 
-      const sessionPromise = ai.live.connect({
-        model: 'gemini-2.5-flash-native-audio-preview-12-2025',
+      const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+      // Use the TTS model to generate speech from the text
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash-preview-tts",
+        contents: [{ parts: [{ text: text }] }],
         config: {
           responseModalities: [Modality.AUDIO],
-          speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: 'Kore' } } },
-          inputAudioTranscription: {},
-          outputAudioTranscription: {},
-          systemInstruction: systemPrompt,
+          speechConfig: {
+            voiceConfig: {
+              prebuiltVoiceConfig: { voiceName: 'Kore' },
+            },
+          },
         },
-        callbacks: {
-          onopen: () => {
-            setIsActive(true);
-            const source = audioContextInRef.current!.createMediaStreamSource(stream);
-            const scriptProcessor = audioContextInRef.current!.createScriptProcessor(4096, 1, 1);
-            scriptProcessor.onaudioprocess = (e) => {
-              const inputData = e.inputBuffer.getChannelData(0);
-              sessionPromise.then(session => session.sendRealtimeInput({ media: createBlob(inputData) }));
-            };
-            source.connect(scriptProcessor);
-            scriptProcessor.connect(audioContextInRef.current!.destination);
-          },
-          onmessage: async (m: LiveServerMessage) => {
-            const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
-            if (m.serverContent?.inputTranscription) setCurrentInput(p => p + m.serverContent!.inputTranscription!.text);
-            if (m.serverContent?.outputTranscription) setCurrentOutput(p => p + m.serverContent!.outputTranscription!.text);
-            if (m.serverContent?.turnComplete) {
-              setMessages(p => [...p, { role: 'user', text: currentInput || "...", type: 'voice', timestamp: now }, { role: 'bot', text: currentOutput || "...", type: 'voice', timestamp: now }]);
-              setCurrentInput(''); setCurrentOutput('');
-            }
-            const audio = m.serverContent?.modelTurn?.parts[0]?.inlineData?.data;
-            if (audio) {
-              const ctx = audioContextOutRef.current!;
-              nextStartTimeRef.current = Math.max(nextStartTimeRef.current, ctx.currentTime);
-              const buffer = await decodeAudioData(decode(audio), ctx, 24000, 1);
-              const s = ctx.createBufferSource();
-              s.buffer = buffer; 
-              s.connect(gainNodeRef.current!);
-              s.addEventListener('ended', () => sourcesRef.current.delete(s));
-              s.start(nextStartTimeRef.current);
-              nextStartTimeRef.current += buffer.duration;
-              sourcesRef.current.add(s);
-            }
-            if (m.serverContent?.interrupted) {
-              sourcesRef.current.forEach(s => { try { s.stop(); } catch(e){} }); 
-              sourcesRef.current.clear();
-              nextStartTimeRef.current = 0;
-            }
-          },
-          onclose: () => setIsActive(false),
-          onerror: () => stopSession()
-        }
       });
-      liveSessionRef.current = await sessionPromise;
-    } catch (e) { alert("Mikrofonas būtinas."); }
+
+      const audioData = response.candidates?.[0]?.content?.parts?.[0]?.inlineData?.data;
+      
+      if (audioData) {
+        const ctx = audioContextOutRef.current!;
+        const buffer = await decodeAudioData(decode(audioData), ctx, 24000, 1);
+        const source = ctx.createBufferSource();
+        source.buffer = buffer;
+        source.connect(gainNodeRef.current!);
+        
+        source.addEventListener('ended', () => {
+          sourcesRef.current.delete(source);
+          if (sourcesRef.current.size === 0) {
+            setIsPlayingAudio(false);
+          }
+        });
+        
+        source.start();
+        sourcesRef.current.add(source);
+      } else {
+        setIsPlayingAudio(false);
+      }
+
+    } catch (e) {
+      console.error("Audio generation failed", e);
+      setIsPlayingAudio(false);
+    }
   };
 
   const handleSendText = async (customPrompt?: string) => {
     const textToSend = customPrompt || inputText.trim();
     if (!textToSend || isGenerating) return;
+    
+    // Stop any currently playing audio when new request starts
+    stopAudio();
+
     const now = new Date().toLocaleTimeString('lt-LT', { hour: '2-digit', minute: '2-digit' });
     setInputText('');
-    setMessages(prev => [...prev, { role: 'user', text: textToSend, type: 'text', timestamp: now }]);
+    setMessages(prev => [...prev, { role: 'user', text: textToSend, timestamp: now }]);
     setIsGenerating(true);
+    
     try {
       const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
       const response = await ai.models.generateContent({
         model: 'gemini-3-flash-preview',
         contents: [{ role: 'user', parts: [{ text: `${systemPrompt}\n\nUžklausa: ${textToSend}` }] }]
       });
-      setMessages(prev => [...prev, { role: 'bot', text: response.text || "Atsiprašau, įvyko ryšio klaida.", type: 'text', timestamp: now }]);
+      
+      const responseText = response.text || "Atsiprašau, įvyko ryšio klaida.";
+      setMessages(prev => [...prev, { role: 'bot', text: responseText, timestamp: now }]);
+      
+      // Auto-play the response
+      await playResponseAudio(responseText);
+
     } catch (err) {
       setMessages(prev => [...prev, { role: 'bot', text: "Šiuo metu negaliu atsakyti. Patikrinkite ryšį.", timestamp: now }]);
-    } finally { setIsGenerating(false); }
+    } finally { 
+      setIsGenerating(false); 
+    }
   };
 
   const activePrompts = QUICK_PROMPTS[contextTab] || QUICK_PROMPTS.dashboard;
@@ -260,20 +237,19 @@ Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusi
   return (
     <div className="flex flex-col h-[calc(100vh-140px)] max-w-4xl mx-auto bg-white rounded-[2rem] shadow-2xl border border-slate-100 overflow-hidden transition-all duration-500">
       
-      {/* Header with improved hierarchy */}
-      <div className={`px-8 py-5 flex items-center justify-between transition-all duration-1000 ${isActive ? 'bg-emerald-800' : 'bg-slate-900'} text-white relative overflow-hidden`}>
-        {isActive && (
-          <div className="absolute inset-0 bg-gradient-to-r from-emerald-700/50 to-emerald-900/50 animate-pulse pointer-events-none" />
-        )}
+      {/* Header */}
+      <div className={`px-8 py-5 flex items-center justify-between transition-all duration-1000 bg-slate-900 text-white relative overflow-hidden`}>
         <div className="flex items-center space-x-5 relative z-10">
-          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 ${isActive ? 'bg-white text-emerald-800 border-white/40 scale-105 rotate-3' : 'bg-white/10 text-white/50 border-white/10'}`}>
-            {isActive ? <Waves size={28} className="animate-pulse" /> : <Sparkles size={24} />}
+          <div className={`w-14 h-14 rounded-2xl flex items-center justify-center border-2 transition-all duration-500 bg-white/10 text-white/50 border-white/10`}>
+            {isPlayingAudio ? <Waves size={28} className="animate-pulse text-emerald-400" /> : <Sparkles size={24} />}
           </div>
           <div className="space-y-1">
             <h2 className="text-base font-[900] tracking-tight uppercase leading-none">DI Pagalvėlė</h2>
             <div className="flex items-center space-x-2">
-              <span className={`w-2 h-2 rounded-full ${isActive ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
-              <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] leading-none">VAP ASISTENTAS</p>
+              <span className={`w-2 h-2 rounded-full ${isPlayingAudio ? 'bg-emerald-400 animate-ping' : 'bg-slate-500'}`} />
+              <p className="text-[10px] font-black uppercase text-white/40 tracking-[0.2em] leading-none">
+                {isPlayingAudio ? 'KALBA...' : 'VAP ASISTENTAS'}
+              </p>
             </div>
           </div>
         </div>
@@ -291,7 +267,7 @@ Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusi
 
       {/* Main Conversation Area */}
       <div className="flex-1 overflow-y-auto px-8 py-8 space-y-8 bg-slate-50/10 scrollbar-thin">
-        {/* Quick Prompts - Floating Pills */}
+        {/* Quick Prompts */}
         <div className="flex space-x-3 overflow-x-auto pb-6 no-scrollbar -mx-2 px-2">
           {activePrompts.map((p, i) => (
             <button 
@@ -315,12 +291,6 @@ Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusi
                 <div className="flex flex-col space-y-1">
                   <div className={`px-6 py-4 rounded-[1.75rem] text-[15px] font-bold leading-relaxed shadow-sm border ${m.role === 'user' ? 'bg-slate-900 text-white rounded-br-none border-slate-800' : 'bg-white text-slate-800 border-slate-100 rounded-bl-none'}`}>
                     {m.text}
-                    {m.type === 'voice' && (
-                      <div className="mt-3 pt-3 flex items-center space-x-2 border-t border-current/10">
-                        <Ear size={12} className="opacity-30" />
-                        <span className="text-[9px] uppercase font-[900] tracking-[0.2em] opacity-30">Balso atpažinimas</span>
-                      </div>
-                    )}
                   </div>
                   <div className={`flex items-center space-x-1.5 px-2 text-[9px] font-black uppercase tracking-widest text-slate-300 ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                     <Clock size={10} />
@@ -380,41 +350,8 @@ Jei vartotojas mini krizę ar didelį stresą, pirmiausia pasiūlyk trumpą nusi
               >
                 {isMuted ? <VolumeX size={24} /> : <Volume2 size={24} />}
               </button>
-
-              <button 
-                onClick={isActive ? stopSession : startSession} 
-                className={`w-16 h-16 rounded-[2rem] flex items-center justify-center transition-all relative border-4 active:scale-95 ${isActive ? 'bg-rose-600 text-white border-rose-500 shadow-2xl shadow-rose-200 animate-pulse' : 'bg-emerald-700 text-white border-emerald-600 hover:bg-emerald-800 hover:scale-105 shadow-xl shadow-emerald-900/10'}`}
-                title={isActive ? "Išjungti balsą" : "Kalbėti balsu"}
-              >
-                {isActive ? <MicOff size={28} /> : <Mic size={28} />}
-                {isActive && (
-                  <div className="absolute -inset-3 border-4 border-rose-400/20 rounded-[2.5rem] animate-ping" />
-                )}
-              </button>
             </div>
           </div>
-
-          {/* Real-time Status Overlay */}
-          {isActive && (currentInput || currentOutput) && (
-            <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100/50 animate-in fade-in slide-in-from-bottom-4 duration-700 flex items-start space-x-4 shadow-sm backdrop-blur-sm">
-               <div className="bg-emerald-600 p-3 rounded-2xl text-white shadow-lg shadow-emerald-200/50 mt-0.5">
-                  <Waves size={20} className="animate-pulse" />
-               </div>
-               <div className="flex-1 space-y-2">
-                  <div className="flex items-center justify-between">
-                     <span className="text-[10px] font-[900] uppercase text-emerald-800 tracking-[0.25em]">DI Ryšys: Aktyvi transkripcija</span>
-                     <div className="flex space-x-1 items-end h-3">
-                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0s]" style={{height: '40%'}} />
-                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0.2s]" style={{height: '90%'}} />
-                        <div className="w-1 bg-emerald-500 animate-[bounce_1s_infinite_0.4s]" style={{height: '60%'}} />
-                     </div>
-                  </div>
-                  <p className="text-[14px] font-[700] text-emerald-900 leading-snug italic">
-                    „{currentOutput || currentInput || "Klausau Jūsų, kalbėkite..."}“
-                  </p>
-               </div>
-            </div>
-          )}
         </div>
       </div>
 
